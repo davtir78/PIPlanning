@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate PI Planner Sample Data</title>
+    <!-- Load SheetJS from CDN -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- Load necessary PI Planner scripts for models and storage -->
+    <script src="js/utils.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/importExport.js"></script>
+</head>
+<body>
+    <h1>Generating Sample PI Planner Data...</h1>
+    <p>This page will automatically generate and download a sample `pi_planner_sample_data.xlsx` file.</p>
+    <p>If the download does not start automatically, please check your browser's download settings.</p>
+    <p>You can close this tab once the download is complete.</p>
+
+    <script>
+        // Dummy data for sample export
+        const sampleEpics = [
+            new Epic('Frontend'),
+            new Epic('Backend'),
+            new Epic('Database')
+        ];
+
+        const sampleSprints = [
+            new Sprint('PI 24.1 - Sprint 1', '2024-01-01', '2024-01-14', 40),
+            new Sprint('PI 24.1 - Sprint 2', '2024-01-15', '2024-01-28', 35)
+        ];
+
+        const sampleTasks = [
+            new Task('Implement Login', 8, sampleEpics[0].id, sampleSprints[0].id, '#FF0000', 'Backend Team'),
+            new Task('Design Database Schema', 5, sampleEpics[2].id, sampleSprints[0].id, '#00FF00', null),
+            new Task('Setup CI/CD', 13, sampleEpics[1].id, sampleSprints[1].id, '#0000FF', 'DevOps Team'),
+            new Task('Refactor UI', 3, sampleEpics[0].id, null, '#FF0000', null) // Backlog task
+        ];
+
+        const sampleDependentTeams = ['Frontend Team', 'Backend Team', 'QA Team', 'DevOps Team'];
+        const sampleFeatureTemplates = ['Bug Fix', 'New Feature', 'Refactor'];
+
+        // Temporarily save sample data to Storage so exportXLSX can pick it up
+        Storage.saveEpics(sampleEpics);
+        Storage.saveSprints(sampleSprints);
+        Storage.saveTasks(sampleTasks);
+        Storage.saveDependentTeams(sampleDependentTeams);
+        Storage.saveFeatureTemplates(sampleFeatureTemplates);
+
+        // Trigger the export
+        document.addEventListener('DOMContentLoaded', () => {
+            ImportExport.exportXLSX(() => {
+                console.log('Sample data exported successfully!');
+                // Optionally, clear the dummy data after export if it's not meant to persist
+                // Storage.clearAllData(); // Be careful with this, might clear user's actual data
+            }, (error) => {
+                console.error('Error generating sample data:', error);
+                alert('Failed to generate sample data: ' + error);
+            });
+        });
+    </script>
+</body>
+</html>
