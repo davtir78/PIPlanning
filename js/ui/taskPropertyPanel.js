@@ -98,8 +98,11 @@ const TaskPropertyPanel = (() => {
         taskPropertyPanelElement.style.zIndex = '900'; // Ensure it's on top when open
         taskNameInput.focus();
 
-        // Add event listener to close panel when clicking outside
-        document.addEventListener('click', _handleOutsideClick);
+        // Add event listener to close panel when clicking outside, with a small delay
+        // to prevent immediate closure from stray events during panel opening.
+        setTimeout(() => {
+            document.addEventListener('click', _handleOutsideClick);
+        }, 50); // 50ms delay
     }
 
     /**
@@ -268,10 +271,17 @@ const TaskPropertyPanel = (() => {
         deleteTaskBtn = document.getElementById('delete-task-btn');
 
 
-        if (!taskPropertyPanelElement || !closeTaskPanelBtn || !saveTaskBtn || !cancelTaskBtn || !taskColorPaletteContainer || !selectedTaskColorValueInput || !deleteTaskBtn || !taskDependentTeamSelect || !taskEpicSelect) { // Added taskEpicSelect to check
-            console.error("Task Property Panel critical elements not found in DOM. Ensure IDs are correct.");
-            return;
-        }
+        if (!taskPropertyPanelElement) { console.error("Task Property Panel element not found."); return; }
+        if (!closeTaskPanelBtn) { console.error("Close Task Panel button not found."); return; }
+        if (!saveTaskBtn) { console.error("Save Task button not found."); return; }
+        if (!cancelTaskBtn) { console.error("Cancel Task button not found."); return; }
+        if (!taskColorPaletteContainer) { console.error("Task Color Palette Container not found."); return; }
+        if (!selectedTaskColorValueInput) { console.error("Selected Task Color Value input not found."); return; }
+        if (!deleteTaskBtn) { console.error("Delete Task button not found."); return; }
+        if (!taskDependentTeamSelect) { console.error("Task Dependent Team Select not found."); return; }
+        if (!taskEpicSelect) { console.error("Task Epic Select not found."); return; }
+
+        console.log("All critical Task Property Panel elements found.");
         _populateColorPalette();
 
         closeTaskPanelBtn.addEventListener('click', () => {
