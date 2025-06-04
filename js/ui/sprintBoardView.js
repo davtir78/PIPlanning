@@ -172,11 +172,7 @@ const SprintBoardView = (() => {
         epicElement.textContent = `Epic: ${epicName}`; // Renamed Component to Epic
         card.appendChild(epicElement);
 
-        if (task.dependentTeam && task.dependentTeam !== 'None') { // Only show if a dependent team is selected
-            const dependencyElement = createElement('p', 'task-dependency');
-            dependencyElement.innerHTML = `&#x1F517; ${task.dependentTeam}`; // Chain icon + team name
-            card.appendChild(dependencyElement);
-        }
+        // Dependent team display is removed as per request
 
         card.addEventListener('click', () => {
             const taskData = Storage.getTaskById(task.id); // Use Storage object

@@ -601,8 +601,8 @@ body {
     background-color: var(--card-background); /* White background for contrast */
     border: none; /* Removed border */
     border-left: 5px solid var(--primary-purple); /* Wider left border for color indicator, default purple */
-    padding: 10px 12px; /* Increased internal padding */
-    margin-bottom: 10px; /* Increased margin between cards */
+    padding: 6px 8px; /* Decreased internal padding */
+    margin-bottom: 6px; /* Decreased margin between cards */
     border-radius: 6px; /* Softer, modern border radius */
     box-shadow: 0 2px 4px var(--shadow-light); /* Subtle shadow */
     cursor: grab;
@@ -615,14 +615,14 @@ body {
     border-left-color: var(--accent-green); /* Green border on hover */
 }
 .task-card .task-name {
-    font-size: 1rem; /* Slightly larger font for name */
+    font-size: 0.9rem; /* Decreased font for name */
     font-weight: 600; /* Bolder name */
     color: var(--text-color-dark); /* Dark text for title */
-    margin: 0 0 8px 0; /* Increased margin below name */
+    margin: 0 0 4px 0; /* Decreased margin below name */
 }
 .task-card p { /* Style for paragraphs within task card */
-    font-size: 0.85rem; /* Smaller font for details */
-    margin: 2px 0; /* Reduced vertical margin for compactness */
+    font-size: 0.75rem; /* Decreased font for details */
+    margin: 1px 0; /* Decreased vertical margin for compactness */
     color: var(--text-color-medium); /* Slightly muted text color for details */
     display: flex; /* Use flex for meta info */
     align-items: center;
@@ -634,7 +634,7 @@ body {
     font-style: italic; /* Italicize dependency */
     color: var(--text-color-light); /* Muted color for dependency */
     margin-top: 5px; /* Add some space above it */
-    font-size: 0.8rem; /* Slightly smaller font for dependency */
+    font-size: 0.7rem; /* Decreased font for dependency */
 }
 
 /* Styling for SortableJS placeholders */
