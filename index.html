@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI Planner</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- SortableJS via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css" type="text/css">
+    <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" type="text/javascript"></script>
+    <!-- SheetJS (xlsx.full.min.js) via CDN for XLSX import/export -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- Scripts will be moved to the end of body for better performance and DOM access -->
+    <header id="app-header">
+        <div class="header-title">
+            <h1>PI Planner</h1>
+        </div>
+        <nav class="header-nav">
+            <button id="sprint-board-btn" class="view-toggle-btn active" data-view="sprint-board-view">Sprint Board</button>
+            <button id="gantt-view-btn" class="view-toggle-btn" data-view="gantt-view">Roadmap</button>
+            <button id="settings-btn" class="view-toggle-btn" data-view="settings-view">Settings</button>
+        </nav>
+        <div id="header-controls" class="header-controls">
+            <!-- The Add Sprint button will be dynamically added by SprintBoardView when active -->
+        </div>
+    </header>
+
+    <main id="app-main">
+        <!-- Main content area for different views -->
+        <div id="sprint-board-view" class="view active-view">
+            <!-- Sprint Board content will go here -->
+        </div>
+        <div id="pi-objectives-view" class="view" style="display: none;">
+            <!-- PI Objectives content will go here -->
+        </div>
+        <!-- Settings View -->
+        <div id="settings-view" class="view" style="display: none;">
+            <!-- Settings content will go here -->
+        </div>
+        <div id="gantt-view" class="view" style="display: none;">
+            <div class="gantt-controls">
+                <label for="gantt-scale-select">Time Scale:</label>
+                <select id="gantt-scale-select">
+                    <option value="Day">Day</option>
+                    <option value="Week" selected>Week</option>
+                    <option value="Month">Month</option>
+                    <option value="Quarter">Quarter</option>
+                    <option value="Year">Year</option>
+                </select>
+
+                <label for="gantt-team-filter-select">Dependent Team:</label>
+                <select id="gantt-team-filter-select">
+                    <option value="All">All Teams</option>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div id="gantt_chart_container" style="width: 100%; height: calc(100% - 80px);"></div>
+        </div>
+    </main>
+
+    <div id="welcome-modal" class="modal" style="display: none;">
+        <!-- Welcome modal content will go here -->
+    </div>
+
+    <div id="task-property-panel" class="panel"> <!-- Corrected structure -->
+        <div class="panel-header">
+            <h3 id="task-panel-title">Task Details</h3>
+            <button id="close-task-panel-btn" class="close-btn">&times;</button>
+        </div>
+        <div class="panel-content">
+            <input type="hidden" id="task-id-input">
+            <input type="hidden" id="task-target-sprint-id-input">
+
+            <label for="task-name-input">Task Name:</label>
+            <input type="text" id="task-name-input" name="task-name">
+
+            <label for="task-story-points-input">Story Points:</label>
+            <input type="number" id="task-story-points-input" name="task-story-points" min="0">
+
+            <label for="task-epic-select">Epic:</label>
+            <select id="task-epic-select" name="task-epic">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+
+            <label>Color:</label> <!-- Changed label -->
+            <div id="task-color-palette-container" class="color-palette-container">
+                <!-- Color swatches will be populated by JavaScript -->
+            </div>
+            <input type="hidden" id="selected-task-color-value" name="selected-task-color-value">
+            <!-- Original input type="color" removed -->
+
+            <label for="task-dependent-team-select">Dependent Team:</label>
+            <select id="task-dependent-team-select" name="task-dependent-team">
+                <option value="">None</option>
+                <!-- Options like Frontend, Backend will be populated from config -->
+            </select>
+
+            <div class="panel-footer">
+                <button id="save-task-btn" class="button-primary">Save Task</button>
+                <button id="delete-task-btn" class="button-danger">Delete Task</button>
+                <button id="cancel-task-btn" class="button-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dependencies-panel" class="panel collapsible-sidebar" style="display: none;">
+        <!-- Dependencies panel content will go here -->
+    </div>
+
+    <!-- JavaScript files - Order is crucial! -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/importExport.js"></script> <!-- New: Shared import/export logic -->
+    <script src="js/data/initialSetup.js"></script>
+    <script src="js/ui/welcomeModal.js"></script>
+    <script src="js/ui/header.js"></script>
+    <script src="js/ui/sprintBoardView.js"></script>
+    <script src="js/ui/taskPropertyPanel.js"></script>
+    <script src="js/ui/featureTemplateModal.js"></script>
+    <script src="js/ui/ganttView.js"></script>
+    <script src="js/ui/settingsView.js"></script>
+    <script src="js/ui/roadmapView.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
