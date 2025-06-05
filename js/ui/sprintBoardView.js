@@ -155,9 +155,14 @@ const SprintBoardView = (() => {
      */
     function _renderTaskCard(task, epics) { // Renamed components to epics
         const card = createElement('div', 'task-card', { 'data-task-id': task.id }); // Corrected
-        // Use task.color for left border, default to a fallback color
-        const borderColor = task.color || defaultTaskColor || '#D3D3D3'; // Corrected
-        card.style.borderLeft = `5px solid ${borderColor}`;
+        const cardColor = task.color || defaultTaskColor || '#D3D3D3'; // Get task color
+
+        card.style.backgroundColor = cardColor; // Set background color of the entire card
+
+        // Determine if the background color is dark to adjust text color for readability
+        if (isColorDark(cardColor)) { // Assuming isColorDark utility function exists
+            card.classList.add('dark-background');
+        }
 
         const nameElement = createElement('h4', 'task-name', null, task.name); // Corrected
         card.appendChild(nameElement);

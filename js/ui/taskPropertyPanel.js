@@ -16,6 +16,7 @@ const TaskPropertyPanel = (() => {
     let saveTaskBtn = null;
     let cancelTaskBtn = null;
     let deleteTaskBtn = null; // Added delete button reference
+    let duplicateTaskBtn = null; // Added duplicate button reference
 
     // let currentEditingTask = null; // This is not needed if task data is fetched on open
 
@@ -80,6 +81,7 @@ const TaskPropertyPanel = (() => {
             _setActiveColorSwatch(taskToEdit.color || PREDEFINED_TASK_COLOR_VALUES[0] || '#D3D3D3');
             taskTargetSprintIdInput.value = taskToEdit.sprintId || 'Backlog';
             if (deleteTaskBtn) deleteTaskBtn.style.display = 'inline-block';
+            if (duplicateTaskBtn) duplicateTaskBtn.style.display = 'inline-block'; // Show duplicate button
         } else {
             taskPanelTitleElement.textContent = 'Add New Task';
             taskIdInput.value = '';
@@ -93,6 +95,7 @@ const TaskPropertyPanel = (() => {
             _setActiveColorSwatch(defaultColor);
             taskTargetSprintIdInput.value = targetSprintId;
             if (deleteTaskBtn) deleteTaskBtn.style.display = 'none';
+            if (duplicateTaskBtn) duplicateTaskBtn.style.display = 'none'; // Hide duplicate button
         }
         taskPropertyPanelElement.classList.add('open');
         taskPropertyPanelElement.style.zIndex = '900'; // Ensure it's on top when open
@@ -269,6 +272,7 @@ const TaskPropertyPanel = (() => {
         saveTaskBtn = document.getElementById('save-task-btn');
         cancelTaskBtn = document.getElementById('cancel-task-btn');
         deleteTaskBtn = document.getElementById('delete-task-btn');
+        duplicateTaskBtn = document.getElementById('duplicate-task-btn');
 
 
         if (!taskPropertyPanelElement) { console.error("Task Property Panel element not found."); return; }
@@ -278,6 +282,7 @@ const TaskPropertyPanel = (() => {
         if (!taskColorPaletteContainer) { console.error("Task Color Palette Container not found."); return; }
         if (!selectedTaskColorValueInput) { console.error("Selected Task Color Value input not found."); return; }
         if (!deleteTaskBtn) { console.error("Delete Task button not found."); return; }
+        if (!duplicateTaskBtn) { console.error("Duplicate Task button not found."); return; }
         if (!taskDependentTeamSelect) { console.error("Task Dependent Team Select not found."); return; }
         if (!taskEpicSelect) { console.error("Task Epic Select not found."); return; }
 
@@ -294,6 +299,7 @@ const TaskPropertyPanel = (() => {
         });
         saveTaskBtn.addEventListener('click', _handleSave);
         deleteTaskBtn.addEventListener('click', _handleDelete);
+        duplicateTaskBtn.addEventListener('click', _handleDuplicate); // Add event listener for duplicate button
 
 
         document.addEventListener('keydown', (event) => {
@@ -302,6 +308,54 @@ const TaskPropertyPanel = (() => {
             }
         });
         console.log("TaskPropertyPanel initialized.");
+    }
+
+    /**
+     * Handles duplicating the current task.
+     * @private
+     */
+    function _handleDuplicate() {
+        const taskId = taskIdInput.value;
+        if (!taskId) {
+            console.error("No task ID found for duplication.");
+            return;
+        }
+
+        const taskToDuplicate = Storage.getTaskById(taskId);
+        if (!taskToDuplicate) {
+            console.error("Task to duplicate not found with ID:", taskId);
+            return;
+        }
+
+        // Create a new Task object with a new ID and modified name
+        const newTaskId = generateUniqueId();
+        const duplicatedTask = new Task(
+            `${taskToDuplicate.name} (Copy)`,
+            taskToDuplicate.storyPoints,
+            taskToDuplicate.epicId,
+            taskToDuplicate.sprintId,
+            taskToDuplicate.color,
+            taskToDuplicate.dependentTeam,
+            newTaskId
+        );
+
+        let allTasks = Storage.getTasks();
+        allTasks.push(duplicatedTask);
+        Storage.saveTasks(allTasks);
+
+        _closePanel();
+
+        // Re-render views and update capacities
+        const sprintBoardViewElement = document.getElementById('sprint-board-view');
+        if (typeof SprintBoardView !== 'undefined' && sprintBoardViewElement && sprintBoardViewElement.classList.contains('active-view')) {
+            SprintBoardView.render();
+        }
+        const roadmapViewElement = document.getElementById('roadmap-view');
+        if (typeof RoadmapView !== 'undefined' && roadmapViewElement && roadmapViewElement.classList.contains('active-view')) {
+            RoadmapView.renderRoadmapGrid();
+        }
+        Header.updateHeaderCapacities();
+        console.log(`Duplicated task with ID: ${taskId} to new ID: ${newTaskId}`);
     }
 
     /**

@@ -598,9 +598,8 @@ body {
 }
 
 .task-card { /* Applying styles to the general task-card class */
-    background-color: var(--card-background); /* White background for contrast */
-    border: none; /* Removed border */
-    border-left: 5px solid var(--primary-purple); /* Wider left border for color indicator, default purple */
+    background-color: var(--card-background); /* Default, will be overridden by JS */
+    border: 1px solid var(--border-color-light); /* Add a subtle border around the card */
     padding: 6px 8px; /* Decreased internal padding */
     margin-bottom: 6px; /* Decreased margin between cards */
     border-radius: 6px; /* Softer, modern border radius */
@@ -612,7 +611,7 @@ body {
 .task-card:hover {
     box-shadow: 0 4px 8px var(--shadow-medium); /* More prominent shadow on hover */
     transform: translateY(-2px); /* Subtle lift effect */
-    border-left-color: var(--accent-green); /* Green border on hover */
+    border-color: var(--accent-green); /* Green border on hover */
 }
 .task-card .task-name {
     font-size: 0.9rem; /* Decreased font for name */
@@ -626,6 +625,12 @@ body {
     color: var(--text-color-medium); /* Slightly muted text color for details */
     display: flex; /* Use flex for meta info */
     align-items: center;
+}
+
+/* Style for task cards with dark background colors to ensure text readability */
+.task-card.dark-background .task-name,
+.task-card.dark-background p {
+    color: white; /* Light text for dark backgrounds */
 }
 .task-card .task-story-points {
     font-weight: 500; /* Make points slightly bolder */
