@@ -21,36 +21,38 @@ const DEFAULT_EPICS = [ // Renamed from DEFAULT_COMPONENTS
 ];
 
 // Color palette for task cards (as per design or a sensible default)
-const TASK_COLORS = [
-    // Row 1: Pastels & Light
-    { name: 'Light Blue', value: '#AEC6CF' },
-    { name: 'Mint Green', value: '#B9E7AF' },
-    { name: 'Pale Yellow', value: '#FFFFA7' },
-    { name: 'Peach', value: '#FFDAB9' },
-    { name: 'Lavender', value: '#CFB9E7' },
-    { name: 'Light Pink', value: '#FFB6C1' },
-    { name: 'Light Gray', value: '#D3D3D3' },
-    // Row 2: Medium Tones
-    { name: 'Sky Blue', value: '#87CEEB' },
-    { name: 'Seafoam Green', value: '#98FB98' },
-    { name: 'Khaki', value: '#F0E68C' },
-    { name: 'Salmon', value: '#FA8072' },
-    { name: 'Orchid', value: '#DA70D6' },
-    { name: 'Coral', value: '#FF7F50' },
-    { name: 'Silver', value: '#C0C0C0' },
-    // Row 3: Bolder/Darker (but still somewhat muted for UI)
-    { name: 'Steel Blue', value: '#4682B4' },
-    { name: 'Forest Green', value: '#228B22' },
-    { name: 'Gold', value: '#FFD700' },
-    { name: 'Tomato', value: '#FF6347' },
-    { name: 'Medium Purple', value: '#9370DB' },
-    { name: 'Hot Pink', value: '#FF69B4' }, // A bit brighter
-    { name: 'Slate Gray', value: '#708090' }
-    // Total: 21 colors
-];
+const TASK_COLORS = {
+    themeColors: [
+        // Grays
+        ['#FFFFFF', '#F2F2F2', '#E0E0E0', '#C0C0C0', '#A0A0A0', '#808080', '#606060', '#404040', '#202020', '#000000'],
+        // Blues
+        ['#E0F2F7', '#B3E0ED', '#80CCE6', '#4DB8DB', '#1AA3CC', '#008CB3', '#006B8A', '#004A61', '#002938', '#00080F'],
+        // Oranges
+        ['#FFF0E0', '#FFE0B3', '#FFC280', '#FFA34D', '#FF851A', '#CC6B00', '#995000', '#663400', '#331A00', '#1A0D00'],
+        // Greens
+        ['#E0FFE0', '#B3FFB3', '#80FF80', '#4DFF4D', '#1AFF1A', '#00CC00', '#009900', '#006600', '#003300', '#001A00'],
+        // Pinks/Purples
+        ['#FFE0F0', '#FFB3E0', '#FF80C2', '#FF4DA3', '#FF1A85', '#CC006B', '#990050', '#660034', '#33001A', '#1A000D'],
+    ],
+    standardColors: [
+        '#FF0000', // Red
+        '#FFA500', // Orange
+        '#FFFF00', // Yellow
+        '#008000', // Green
+        '#0000FF', // Blue
+        '#4B0082', // Indigo
+        '#EE82EE', // Violet
+        '#800000', // Maroon
+        '#808000', // Olive
+        '#008080'  // Teal
+    ]
+};
 
 // Simple array of color values for input type="color" default or basic pickers
-const PREDEFINED_TASK_COLOR_VALUES = TASK_COLORS.map(c => c.value);
+// This will now be generated dynamically or used for specific cases if needed.
+// For the new picker, we'll directly use the structured TASK_COLORS.
+const PREDEFINED_TASK_COLOR_VALUES = [].concat(...TASK_COLORS.themeColors, TASK_COLORS.standardColors);
+
 
 // Dependent teams for the dropdown in task property panel
 const PREDEFINED_DEPENDENT_TEAMS = [

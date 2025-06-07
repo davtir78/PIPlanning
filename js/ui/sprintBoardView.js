@@ -106,6 +106,8 @@ const SprintBoardView = (() => {
         dateRangeElement.addEventListener('click', () => _makeSprintDatesEditable(sprint, dateRangeElement));
 
         const storyPointsElement = createElement('p', 'sprint-story-points');
+        storyPointsElement.title = "Click to edit sprint capacity"; // Tooltip
+        storyPointsElement.addEventListener('click', () => _makeSprintCapacityEditable(sprint, storyPointsElement));
         // Story points will be calculated and set by _updateSprintStoryPointsDisplay or during initial full render
 
         // Create a container for sprint info (name, dates, points)
@@ -167,15 +169,11 @@ const SprintBoardView = (() => {
         const nameElement = createElement('h4', 'task-name', null, task.name); // Corrected
         card.appendChild(nameElement);
 
-        const storyPointsElement = createElement('p', 'task-story-points'); // Corrected
-        storyPointsElement.textContent = `Points: ${task.storyPoints || 0}`;
-        card.appendChild(storyPointsElement);
-
-        const epic = epics.find(e => e.id === task.epicId); // Renamed component to epic, task.componentId to task.epicId
-        const epicName = epic ? epic.name : 'N/A'; // Renamed componentName to epicName
-        const epicElement = createElement('p', 'task-epic'); // Renamed task-component to task-epic
-        epicElement.textContent = `Epic: ${epicName}`; // Renamed Component to Epic
-        card.appendChild(epicElement);
+        const epic = epics.find(e => e.id === task.epicId);
+        const epicName = epic ? epic.name : 'N/A';
+        const combinedInfoElement = createElement('p', 'task-epic-points');
+        combinedInfoElement.textContent = `Epic: ${epicName} - Points: ${task.storyPoints || 0}`;
+        card.appendChild(combinedInfoElement);
 
         // Dependent team display is removed as per request
 
@@ -197,6 +195,7 @@ const SprintBoardView = (() => {
      * @private
      */
     function _renderInternal() {
+        let allTasks = Storage.getTasks(); // Ensure allTasks is defined at the start
         if (!sprintBoardViewElement) {
             console.error("Sprint Board view element not found in DOM for _renderInternal.");
             init(); // Attempt to re-initialize if element is lost
@@ -251,7 +250,7 @@ const SprintBoardView = (() => {
         // Populate tasks into their respective columns (including backlog) and calculate initial story points
         if (sprints && sprints.length > 0) {
             sprints.forEach(sprint => {
-                const sprintTasks = tasks.filter(task => task.sprintId === sprint.id);
+                const sprintTasks = allTasks.filter(task => task && task.sprintId === sprint.id);
                 let usedPoints = 0;
                 sprintTasks.forEach(task => {
                     usedPoints += (task.storyPoints || 0);
@@ -266,7 +265,13 @@ const SprintBoardView = (() => {
         }
 
         // Populate backlog tasks
-        const backlogTasks = tasks.filter(task => !task.sprintId || task.sprintId === 'Backlog');
+        const sprintIds = new Set(sprints.map(s => s.id));
+        const backlogTasks = tasks.filter(task => {
+            if (!task) return false;
+            // A task is in the backlog if it has no sprintId, its sprintId is 'Backlog',
+            // or its sprintId points to a sprint that no longer exists.
+            return !task.sprintId || task.sprintId === 'Backlog' || !sprintIds.has(task.sprintId);
+        });
         const backlogTaskListElement = columnsContainer.querySelector('.task-list[data-sprint-id="Backlog"]');
         if (backlogTaskListElement) {
             backlogTasks.forEach(task => {
@@ -275,53 +280,24 @@ const SprintBoardView = (() => {
             });
         }
 
+        // Add the "Add Sprint" button after the last sprint column
+        const addSprintButton = createElement('button', 'global-add-sprint-btn', null, '+ Add Sprint');
+        addSprintButton.addEventListener('click', () => {
+            if (typeof AddSprintModal !== 'undefined') {
+                AddSprintModal.openModal();
+            } else {
+                console.error("AddSprintModal is not defined. Ensure it's loaded and initialized.");
+                alert("Error: Add Sprint functionality is currently unavailable.");
+            }
+        });
+        columnsContainer.appendChild(addSprintButton);
+
 
         sprintBoardViewElement.appendChild(columnsContainer);
 
         _initializeSortableJS(columnsContainer);
 
         console.log("Sprint Board rendered with current data.");
-    }
-
-    /**
-     * Handles adding a new sprint.
-     * This function is now exposed publicly via the module's return.
-     * @public
-     */
-    function addSprint() {
-        const name = prompt("Enter new sprint name (e.g., PI 24.1 - Sprint X):");
-        if (!name) return;
-
-        const startDateStr = prompt("Enter sprint start date (YYYY-MM-DD):");
-        if (!startDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(startDateStr)) {
-            alert("Invalid start date format. Please use YYYY-MM-DD.");
-            return;
-        }
-
-        const endDateStr = prompt("Enter sprint end date (YYYY-MM-DD):");
-        if (!endDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(endDateStr)) {
-            alert("Invalid end date format. Please use YYYY-MM-DD.");
-            return;
-        }
-        if (new Date(endDateStr) <= new Date(startDateStr)) {
-            alert("End date must be after start date.");
-            return;
-        }
-
-        const capacityStr = prompt(`Enter sprint capacity (default: ${defaultSprintCapacity || 40}):`, (defaultSprintCapacity || 40).toString());
-        const capacity = parseInt(capacityStr, 10);
-        if (isNaN(capacity) || capacity < 0) {
-            alert("Capacity must be a non-negative number.");
-            return;
-        }
-
-        const newSprint = new Sprint(name, startDateStr, endDateStr, capacity);
-        let currentSprints = Storage.getSprints();
-        currentSprints.push(newSprint);
-        Storage.saveSprints(currentSprints);
-
-        _renderInternal(); // Re-render
-        console.log("New sprint added:", newSprint);
     }
 
     /**
@@ -346,10 +322,16 @@ const SprintBoardView = (() => {
             if (sprintToUpdate && newName && newName !== oldName) {
                 sprintToUpdate.name = newName;
                 Storage.saveSprints(currentSprints); // Use Storage object
+                // Immediately update the text content of the original element and replace the input
+                nameElement.textContent = newName;
+                input.replaceWith(nameElement);
+                _renderInternal(); // Re-render to ensure consistency across the board
             } else {
+                // If no change or invalid input, revert the text and replace input
                 nameElement.textContent = oldName;
+                input.replaceWith(nameElement);
+                _renderInternal(); // Re-render to ensure consistency across the board
             }
-            input.replaceWith(nameElement);
         }
 
         input.addEventListener('blur', saveSprintName);
@@ -421,6 +403,47 @@ const SprintBoardView = (() => {
     }
 
     /**
+     * Makes sprint capacity editable in place.
+     * @param {Sprint} sprint - The sprint object to edit.
+     * @param {HTMLElement} storyPointsElement - The P element displaying the story points.
+     * @private
+     */
+    function _makeSprintCapacityEditable(sprint, storyPointsElement) {
+        const oldCapacity = sprint.capacity;
+        const input = createElement('input', 'sprint-capacity-edit', { type: 'number', value: oldCapacity, min: "0" });
+
+        storyPointsElement.replaceWith(input);
+        input.focus();
+        input.select();
+
+        function saveSprintCapacity() {
+            const newCapacity = parseInt(input.value, 10);
+            let currentSprints = Storage.getSprints();
+            const sprintToUpdate = currentSprints.find(s => s.id === sprint.id);
+
+            if (sprintToUpdate && !isNaN(newCapacity) && newCapacity >= 0 && newCapacity !== oldCapacity) {
+                sprintToUpdate.capacity = newCapacity;
+                Storage.saveSprints(currentSprints);
+                _renderInternal(); // Re-render to update display and capacity check
+            } else {
+                // Revert to old display if input is invalid or not changed
+                _updateSprintStoryPointsDisplay(sprint.id, Storage.getTasksBySprintId(sprint.id).reduce((sum, t) => sum + (t.storyPoints || 0), 0), oldCapacity);
+            }
+            input.replaceWith(storyPointsElement);
+        }
+
+        input.addEventListener('blur', saveSprintCapacity);
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                saveSprintCapacity();
+            } else if (event.key === 'Escape') {
+                _updateSprintStoryPointsDisplay(sprint.id, Storage.getTasksBySprintId(sprint.id).reduce((sum, t) => sum + (t.storyPoints || 0), 0), oldCapacity);
+                input.replaceWith(storyPointsElement);
+            }
+        });
+    }
+
+    /**
      * Initializes SortableJS on all task lists within the provided container.
      * @param {HTMLElement} container - The container element holding the sprint columns.
      * @private
@@ -437,56 +460,54 @@ const SprintBoardView = (() => {
                 onEnd: function (event) {
                     const taskId = event.item.dataset.taskId;
                     const newSprintId = event.to.dataset.sprintId;
-                    const oldSprintId = event.from.dataset.sprintId;
 
-                    const task = Storage.getTaskById(taskId); // Use Storage object
-                    if (!task) {
-                        console.error(`Task with ID ${taskId} not found for drag & drop.`);
-                        _renderInternal(); // Re-render to correct potential UI inconsistency
+                    // 1. Get all tasks from storage, filtering out any nulls
+                    let allTasks = Storage.getTasks().filter(Boolean);
+
+                    // 2. Find the task that was moved
+                    const movedTask = allTasks.find(t => t.id === taskId);
+                    if (!movedTask) {
+                        console.error(`Task with ID ${taskId} not found in storage. Re-rendering to prevent state corruption.`);
+                        _renderInternal();
                         return;
                     }
 
-                    // Capacity Check
-                    if (newSprintId !== 'Backlog' && newSprintId !== oldSprintId) {
-                        const targetSprint = Storage.getSprintById(newSprintId); // Use Storage object
-                        if (targetSprint) {
-                            const tasksInTargetSprint = Storage.getTasksBySprintId(newSprintId); // Use Storage object
-                            // Exclude the current task if it was already in the target list (e.g., reordering within the same list)
-                            // This filter is more accurate if the task is not yet updated in storage.
-                            const pointsInTargetSprint = tasksInTargetSprint
-                                .filter(t => t.id !== taskId) // Points of other tasks
-                                .reduce((sum, t) => sum + (t.storyPoints || 0), 0);
+                    // 3. Update the sprint ID of the moved task
+                    movedTask.sprintId = newSprintId;
 
-                            if ((pointsInTargetSprint + (task.storyPoints || 0)) > targetSprint.capacity) {
-                                // Instead of alert, the _updateSprintStoryPointsDisplay function will handle visual indication (e.g., turning red)
-                                // SortableJS often reverts automatically if an error is thrown or if the operation is cancelled.
-                                // For a more explicit revert, a full re-render is safest.
-                                _renderInternal(); // Re-render to reflect the state and trigger capacity styling
-                                // Do NOT return here, allow the task to be moved even if over capacity
+                    // 4. Re-order the tasks array based on the new DOM order
+                    const reorderedTasks = [];
+                    const taskMap = new Map(allTasks.map(t => [t.id, t]));
+                    
+                    const allTaskListElements = container.querySelectorAll('.task-list');
+                    allTaskListElements.forEach(listElement => {
+                        const orderedIds = Array.from(listElement.children).map(child => child.dataset.taskId);
+                        orderedIds.forEach(id => {
+                            if (taskMap.has(id)) {
+                                reorderedTasks.push(taskMap.get(id));
+                                taskMap.delete(id); // Remove from map to avoid duplicates
                             }
-                        }
+                        });
+                    });
+
+                    // Add any remaining tasks from the map (shouldn't happen in a consistent state)
+                    if (taskMap.size > 0) {
+                        console.warn("Some tasks were not found in the DOM during re-ordering. Appending them to the end.", [...taskMap.values()]);
+                        reorderedTasks.push(...taskMap.values());
                     }
 
-                    // task.sprintId = newSprintId; // Update the task in the main array
-                    // saveTask(task); // Corrected: Save the individual task - This needs to be saveTasks(allTasks)
+                    // 5. Save the newly ordered and updated tasks
+                    Storage.saveTasks(reorderedTasks);
 
-                    let allTasks = Storage.getTasks(); // Use Storage object
-                    const taskToUpdate = allTasks.find(t => t.id === taskId);
-                    if (taskToUpdate) {
-                        taskToUpdate.sprintId = newSprintId;
-                        Storage.saveTasks(allTasks); // Use Storage object
-                    } else {
-                        console.error(`Task with ID ${taskId} not found in allTasks for saving.`);
-                    }
-
-                    // Re-render the entire board to reflect changes and update all story points
+                    // 6. Re-render the entire board to reflect the new state
                     _renderInternal();
-                    // Also, if RoadmapView is active and linked, it might need an update.
+                    
+                    // 7. Update other views if necessary
                     const roadmapViewElement = document.getElementById('roadmap-view');
                     if (typeof RoadmapView !== 'undefined' && roadmapViewElement && roadmapViewElement.style.display !== 'none') {
                         RoadmapView.renderRoadmapGrid();
                     }
-                    Header.updateHeaderCapacities(); // Update global capacity indicators if any
+                    Header.updateHeaderCapacities();
                 }
             });
         });
@@ -524,7 +545,6 @@ const SprintBoardView = (() => {
         render: _renderInternal, // Expose main render function
         show,
         hide,
-        addSprint, // Expose the addSprint function
         updateSprintStoryPointsDisplay: _updateSprintStoryPointsDisplay // Expose if needed externally
     };
 })();

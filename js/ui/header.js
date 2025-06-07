@@ -25,7 +25,6 @@ const Header = (() => {
         // Show the target view using its module's show method
         if (targetViewId === 'sprint-board-view' && typeof SprintBoardView !== 'undefined') {
             SprintBoardView.show();
-            _addSprintButton(); // Add sprint button when sprint board is active
         } else if (targetViewId === 'gantt-view') {
             if (typeof GanttView !== 'undefined') {
                 GanttView.show();
@@ -34,7 +33,6 @@ const Header = (() => {
                 if (ganttViewEl) ganttViewEl.style.display = 'block';
                 console.error("GanttView module not defined.");
             }
-            _removeSprintButton(); // Remove sprint button for other views
         } else if (targetViewId === 'settings-view') {
              if (typeof SettingsView !== 'undefined') {
                  SettingsView.show();
@@ -42,12 +40,10 @@ const Header = (() => {
                  if (settingsViewEl) settingsViewEl.style.display = 'block';
                  console.error("SettingsView module not defined.");
              }
-             _removeSprintButton(); // Remove sprint button for other views
         }
         else {
             const targetViewEl = document.getElementById(targetViewId);
             if (targetViewEl) targetViewEl.style.display = 'block';
-            _removeSprintButton(); // Remove sprint button for other views
         }
 
         // Update active button state
@@ -73,37 +69,6 @@ const Header = (() => {
         console.log(`Switched to view: ${targetViewId}`);
     }
 
-    /**
-     * Dynamically adds the "+ Add Sprint" button to the header controls.
-     * @private
-     */
-    function _addSprintButton() {
-        if (!headerControlsEl) return;
-        // Check if button already exists to prevent duplicates
-        if (!headerControlsEl.querySelector('#add-sprint-btn')) {
-            const addSprintBtn = createElement('button', 'global-add-sprint-btn', { id: 'add-sprint-btn' }, '+ Add Sprint');
-            addSprintBtn.addEventListener('click', () => {
-                if (typeof SprintBoardView !== 'undefined' && SprintBoardView.addSprint) {
-                    SprintBoardView.addSprint();
-                } else {
-                    console.warn("SprintBoardView.addSprint method not available.");
-                }
-            });
-            headerControlsEl.appendChild(addSprintBtn);
-        }
-    }
-
-    /**
-     * Dynamically removes the "+ Add Sprint" button from the header controls.
-     * @private
-     */
-    function _removeSprintButton() {
-        if (!headerControlsEl) return;
-        const addSprintBtn = headerControlsEl.querySelector('#add-sprint-btn');
-        if (addSprintBtn) {
-            addSprintBtn.remove();
-        }
-    }
 
     /**
      * Initializes event listeners for all header controls.

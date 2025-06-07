@@ -75,7 +75,7 @@ const TaskPropertyPanel = (() => {
             taskPanelTitleElement.textContent = 'Edit Task';
             taskIdInput.value = taskToEdit.id;
             taskNameInput.value = taskToEdit.name;
-            taskStoryPointsInput.value = taskToEdit.storyPoints || 0;
+            taskStoryPointsInput.value = taskToEdit.storyPoints !== undefined && taskToEdit.storyPoints !== null ? taskToEdit.storyPoints : 0;
             taskEpicSelect.value = taskToEdit.epicId || ''; // Renamed from taskComponentSelect.value = taskToEdit.componentId
             taskDependentTeamSelect.value = taskToEdit.dependentTeam || '';
             _setActiveColorSwatch(taskToEdit.color || PREDEFINED_TASK_COLOR_VALUES[0] || '#D3D3D3');
@@ -86,7 +86,7 @@ const TaskPropertyPanel = (() => {
             taskPanelTitleElement.textContent = 'Add New Task';
             taskIdInput.value = '';
             taskNameInput.value = '';
-            taskStoryPointsInput.value = '0';
+            taskStoryPointsInput.value = 0; // Set to 0 for new tasks
             taskEpicSelect.value = ''; // Renamed from taskComponentSelect.value
             taskDependentTeamSelect.value = '';
             const defaultColor = (PREDEFINED_TASK_COLOR_VALUES && PREDEFINED_TASK_COLOR_VALUES.length > 0)
@@ -147,7 +147,7 @@ const TaskPropertyPanel = (() => {
     function _handleSave() {
         const id = taskIdInput.value;
         const name = taskNameInput.value.trim();
-        const storyPoints = parseInt(taskStoryPointsInput.value, 10);
+        const storyPoints = parseFloat(taskStoryPointsInput.value);
         const epicId = taskEpicSelect.value; // Renamed from componentId
         const color = selectedTaskColorValueInput.value;
         const dependentTeam = taskDependentTeamSelect.value;
@@ -157,8 +157,9 @@ const TaskPropertyPanel = (() => {
             taskNameInput.focus();
             return;
         }
-        if (isNaN(storyPoints) || storyPoints < 0) {
-            alert("Story Points must be a non-negative number.");
+        // Validate story points: must be a non-negative number and allow 0.25, 0.5 increments
+        if (isNaN(storyPoints) || storyPoints < 0 || (storyPoints % 1 !== 0 && storyPoints % 0.25 !== 0 && storyPoints % 0.5 !== 0)) {
+            alert("Story Points must be a non-negative number, allowing increments of 0.25 or 0.5 (e.g., 1, 1.25, 1.5, 2).");
             taskStoryPointsInput.focus();
             return;
         }
@@ -232,7 +233,8 @@ const TaskPropertyPanel = (() => {
         if (confirm("Are you sure you want to delete this task? This cannot be undone.")) {
             let allTasks = Storage.getTasks();
             const initialLength = allTasks.length;
-            allTasks = allTasks.filter(task => task.id !== taskId);
+            // Add a null check to prevent errors if the tasks array contains null entries.
+            allTasks = allTasks.filter(task => task && task.id !== taskId);
 
             if (allTasks.length < initialLength) {
                 Storage.saveTasks(allTasks);
@@ -366,16 +368,36 @@ const TaskPropertyPanel = (() => {
         if (!taskColorPaletteContainer) return;
         taskColorPaletteContainer.innerHTML = '';
 
-        PREDEFINED_TASK_COLOR_VALUES.forEach(colorValue => {
+        // Theme Colors section
+        TASK_COLORS.themeColors.forEach(colorRow => {
+            const colorGroupDiv = createElement('div', 'color-swatch-group');
+            colorRow.forEach(colorValue => {
+                const swatch = createElement('div', 'color-swatch', { 'data-color': colorValue });
+                swatch.style.backgroundColor = colorValue;
+                swatch.title = colorValue; // Tooltip for individual swatch
+
+                swatch.addEventListener('click', () => {
+                    _setActiveColorSwatch(colorValue);
+                });
+                colorGroupDiv.appendChild(swatch);
+            });
+            taskColorPaletteContainer.appendChild(colorGroupDiv);
+        });
+
+        // Standard Colors section
+
+        const standardColorGroupDiv = createElement('div', 'color-swatch-group');
+        TASK_COLORS.standardColors.forEach(colorValue => {
             const swatch = createElement('div', 'color-swatch', { 'data-color': colorValue });
             swatch.style.backgroundColor = colorValue;
-            swatch.title = colorValue;
+            swatch.title = colorValue; // Tooltip for individual swatch
 
             swatch.addEventListener('click', () => {
                 _setActiveColorSwatch(colorValue);
             });
-            taskColorPaletteContainer.appendChild(swatch);
+            standardColorGroupDiv.appendChild(swatch);
         });
+        taskColorPaletteContainer.appendChild(standardColorGroupDiv);
     }
 
     /**

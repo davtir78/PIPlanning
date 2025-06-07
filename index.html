@@ -66,6 +66,34 @@
         <!-- Welcome modal content will go here -->
     </div>
 
+    <div id="add-sprint-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Add New Sprint</h2>
+            <form id="add-sprint-form">
+                <div class="form-group">
+                    <label for="new-sprint-name">Sprint Name:</label>
+                    <input type="text" id="new-sprint-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-sprint-start-date">Start Date:</label>
+                    <input type="date" id="new-sprint-start-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-sprint-end-date">End Date:</label>
+                    <input type="date" id="new-sprint-end-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-sprint-capacity">Capacity (points):</label>
+                    <input type="number" id="new-sprint-capacity" value="40" min="0" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Sprint</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-add-sprint-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="task-property-panel" class="panel"> <!-- Corrected structure -->
         <div class="panel-header">
             <h3 id="task-panel-title">Task Details</h3>
@@ -120,13 +148,14 @@
     <script src="js/importExport.js"></script> <!-- New: Shared import/export logic -->
     <script src="js/data/initialSetup.js"></script>
     <script src="js/ui/welcomeModal.js"></script>
-    <script src="js/ui/header.js"></script>
     <script src="js/ui/sprintBoardView.js"></script>
+    <script src="js/ui/header.js"></script>
     <script src="js/ui/taskPropertyPanel.js"></script>
     <script src="js/ui/featureTemplateModal.js"></script>
     <script src="js/ui/ganttView.js"></script>
     <script src="js/ui/settingsView.js"></script>
     <script src="js/ui/roadmapView.js"></script>
+    <script src="js/ui/addSprintModal.js"></script> <!-- New: Add Sprint Modal -->
     <script src="js/main.js"></script>
 </body>
 </html>

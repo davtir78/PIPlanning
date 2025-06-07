@@ -40,11 +40,18 @@ const SettingsView = (() => {
     function renderSettings() {
         if (!settingsViewEl) return;
 
+        // --- Preserve Active Tab ---
+        let activeTab = 'epics'; // Default to 'epics'
+        const activeTabLink = settingsViewEl.querySelector('.tab-link.active');
+        if (activeTabLink) {
+            activeTab = activeTabLink.dataset.tab;
+        }
+
         // Clear previous content and add the main settings container
         settingsViewEl.innerHTML = `
             <div class="settings-page-container">
                 <nav class="tabs-navigation">
-                    <button class="tab-link active" data-tab="epics">Epics</button>
+                    <button class="tab-link" data-tab="epics">Epics</button>
                     <button class="tab-link" data-tab="teams">Teams</button>
                     <button class="tab-link" data-tab="templates">Templates</button>
                     <button class="tab-link" data-tab="import-export">Import/Export</button>
@@ -53,7 +60,7 @@ const SettingsView = (() => {
 
                 <div class="tab-content-area">
                     <!-- Epics Tab Content -->
-                    <div id="epics-tab" class="tab-pane active">
+                    <div id="epics-tab" class="tab-pane">
                         <h2>Manage Epics</h2>
                         <ul class="item-list" id="epics-list"></ul>
                         <div class="add-item-form">
@@ -123,56 +130,71 @@ const SettingsView = (() => {
         const featureTemplatesListEl = settingsViewEl.querySelector('#feature-templates-list');
 
         // Render Epics list
-        if (epicsListEl && epics && epics.length > 0) {
-            epics.forEach(epic => {
-                const epicEl = createElement('li'); // Changed to li for ul
-                epicEl.innerHTML = `
-                    <span>${epic.name}</span>
-                    <div class="actions">
-                        <button class="edit-btn btn btn-edit" data-id="${epic.id}">Edit</button>
-                        <button class="delete-btn btn btn-danger-outline" data-id="${epic.id}">Delete</button>
-                    </div>
-                `;
-                epicsListEl.appendChild(epicEl);
-            });
-        } else if (epicsListEl) {
-             epicsListEl.innerHTML = '<p style="color: var(--text-color-medium);">No epics defined.</p>';
+        if (epicsListEl) {
+            if (epics && epics.length > 0) {
+                epics.forEach(epic => {
+                    const epicEl = createElement('li'); // Changed to li for ul
+                    epicEl.innerHTML = `
+                        <span>${epic.name}</span>
+                        <div class="actions">
+                            <button class="edit-btn btn btn-edit" data-id="${epic.id}">Edit</button>
+                            <button class="delete-btn btn btn-danger-outline" data-id="${epic.id}">Delete</button>
+                        </div>
+                    `;
+                    epicsListEl.appendChild(epicEl);
+                });
+            } else {
+                epicsListEl.innerHTML = '<p style="color: var(--text-color-medium);">No epics defined.</p>';
+            }
         }
 
         // Render Dependent Teams list
-        if (dependentTeamsListEl && dependentTeams && dependentTeams.length > 0) {
-            dependentTeams.forEach(teamName => {
-                const teamEl = createElement('li'); // Changed to li for ul
-                 // For dependent teams, the name is the value/ID for now
-                teamEl.innerHTML = `
-                    <span>${teamName}</span>
-                    <div class="actions">
-                        <button class="edit-btn btn btn-edit" data-name="${teamName}">Edit</button>
-                        <button class="delete-btn btn btn-danger-outline" data-name="${teamName}">Delete</button>
-                    </div>
-                `;
-                dependentTeamsListEl.appendChild(teamEl);
-            });
-        } else if (dependentTeamsListEl) {
-            dependentTeamsListEl.innerHTML = '<p style="color: var(--text-color-medium);">No dependent teams defined.</p>';
+        if (dependentTeamsListEl) {
+            if (dependentTeams && dependentTeams.length > 0) {
+                dependentTeams.forEach(teamName => {
+                    const teamEl = createElement('li'); // Changed to li for ul
+                     // For dependent teams, the name is the value/ID for now
+                    teamEl.innerHTML = `
+                        <span>${teamName}</span>
+                        <div class="actions">
+                            <button class="edit-btn btn btn-edit" data-name="${teamName}">Edit</button>
+                            <button class="delete-btn btn btn-danger-outline" data-name="${teamName}">Delete</button>
+                        </div>
+                    `;
+                    dependentTeamsListEl.appendChild(teamEl);
+                });
+            } else {
+                dependentTeamsListEl.innerHTML = '<p style="color: var(--text-color-medium);">No dependent teams defined.</p>';
+            }
         }
 
         // Render Feature Templates list
-        if (featureTemplatesListEl && featureTemplates && featureTemplates.length > 0) {
-            featureTemplates.forEach(template => {
-                const templateEl = createElement('li'); // Changed to li for ul
-                templateEl.innerHTML = `
-                    <span>${template}</span>
-                    <div class="actions">
-                        <button class="edit-btn btn btn-edit" data-name="${template}">Edit</button>
-                        <button class="delete-btn btn btn-danger-outline" data-name="${template}">Delete</button>
-                    </div>
-                `;
-                featureTemplatesListEl.appendChild(templateEl);
-            });
-        } else if (featureTemplatesListEl) {
-            featureTemplatesListEl.innerHTML = '<p style="color: var(--text-color-medium);">No feature templates defined.</p>';
+        if (featureTemplatesListEl) {
+            if (featureTemplates && featureTemplates.length > 0) {
+                featureTemplates.forEach(template => {
+                    const templateEl = createElement('li'); // Changed to li for ul
+                    templateEl.innerHTML = `
+                        <span>${template}</span>
+                        <div class="actions">
+                            <button class="edit-btn btn btn-edit" data-name="${template}">Edit</button>
+                            <button class="delete-btn btn btn-danger-outline" data-name="${template}">Delete</button>
+                        </div>
+                    `;
+                    featureTemplatesListEl.appendChild(templateEl);
+                });
+            } else {
+                featureTemplatesListEl.innerHTML = '<p style="color: var(--text-color-medium);">No feature templates defined.</p>';
+            }
         }
+
+        // --- Restore Active Tab ---
+        const newActiveTabLink = settingsViewEl.querySelector(`.tab-link[data-tab="${activeTab}"]`);
+        const newActiveTabPane = settingsViewEl.querySelector(`#${activeTab}-tab`);
+        if (newActiveTabLink && newActiveTabPane) {
+            newActiveTabLink.classList.add('active');
+            newActiveTabPane.classList.add('active');
+        }
+
 
         // --- Tab Switching Logic ---
         const tabLinks = settingsViewEl.querySelectorAll('.tab-link');

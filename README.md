@@ -1,6 +1,6 @@
 # PI Planner Web Application
 
-PI Planner is a single-page HTML web application designed for Program Increment (PI) Planning, offering a clean and intuitive interface inspired by Microsoft Planner. It helps teams organize, visualize, and manage tasks, sprints, epics, and dependencies within a PI.
+PI Planner is a single-page HTML web application designed for Program Increment (PI) Planning, offering a clean and intuitive interface. It helps teams organize, visualize, and manage tasks, sprints, epics, and dependencies within a PI.
 
 ## Features
 

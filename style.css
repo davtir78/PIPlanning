@@ -7,6 +7,7 @@
     --light-purple: #EAE6F0;   /* Very light purple for backgrounds */
     --accent-green: #28A745;   /* Green for active states/primary actions */
     --dark-green: #218838;     /* Darker green for hover */
+    --danger-red: #DC3545;     /* Red for warnings/errors */
     --page-background: #F4F6F8; /* Light grey page background */
     --column-background: #EAECEF; /* Light grey for column */
     --card-background: #FFFFFF; /* White for task cards */
@@ -25,7 +26,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent scrollbars on html/body */
+    overflow: auto; /* Allow scrollbars on html/body if content overflows */
 }
 
 *, *::before, *::after {
@@ -61,27 +62,28 @@ body {
 .header-nav button,
 .header-controls button {
     background-color: transparent;
-    border: none; /* Removed border */
-    color: #E0E0E0; /* Light grey for inactive */
-    padding: 8px 15px; /* Adjusted padding */
-    margin-left: 5px; /* Adjusted margin */
-    border-radius: 4px;
+    border: none;
+    color: #E0E0E0;
+    padding: 10px 20px; /* Increased padding */
+    margin: 0 5px; /* Adjusted margin */
+    border-bottom: 3px solid transparent; /* For the active indicator */
+    transition: color 0.3s ease, border-bottom-color 0.3s ease;
+    border-radius: 0; /* Remove border-radius for a tab look */
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .header-nav button:hover,
 .header-controls button:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover effect */
-    color: #FFFFFF; /* Keep text white */
+    color: #FFFFFF;
+    background-color: transparent; /* Remove background color on hover */
 }
 
 .header-nav button.active {
-    background-color: var(--accent-green); /* Green for active tab */
-    color: white;
+    color: #FFFFFF;
     font-weight: bold;
-    border-color: transparent; /* No border for active */
+    border-bottom-color: var(--accent-green); /* Highlight for active tab */
+    background-color: transparent; /* Ensure no background color for active tab */
 }
 
 .header-controls {
@@ -96,7 +98,8 @@ body {
     display: flex; /* Make main a flex container */
     flex-direction: column; /* Stack children vertically */
     width: 100%; /* Ensure main takes full width */
-    overflow: hidden; /* Hide overflow if any */
+    overflow-y: auto; /* Allow vertical scrolling for main content */
+    overflow-x: hidden; /* Hide horizontal overflow */
 }
 
 /* View Styling */
@@ -145,6 +148,8 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     min-width: 300px;
     max-width: 600px;
+    max-height: 90vh; /* Limit height to 90% of viewport height */
+    overflow-y: auto; /* Enable vertical scrolling if content overflows */
     display: flex; /* Allow footer to be at bottom if content is short */
     flex-direction: column;
 }
@@ -187,6 +192,10 @@ body {
     gap: 10px; /* Space between buttons */
 }
 
+.modal-footer .btn {
+    flex: 1 1 0%; /* Make buttons take equal width, overriding default .btn width */
+}
+
 
 /* Panel Styling (Generic for slide-ins or sidebars) */
 .panel {
@@ -199,7 +208,7 @@ body {
     height: 100%; /* Make panel take full height */
     top: 0; /* Align to top */
     left: 0; /* Align to left */
-    width: 300px; /* Example width, adjust as needed */
+    width: 450px; /* 50% wider than 300px (300 * 1.5 = 450) */
     display: flex; /* Use flexbox for internal layout */
     flex-direction: column; /* Stack header, content, footer vertically */
     visibility: hidden; /* Hidden by default */
@@ -255,6 +264,10 @@ body {
     margin-top: auto; /* Push footer to the bottom */
 }
 
+.panel-footer button {
+    flex: 1 1 0%; /* Make buttons take equal width, overriding default .btn width */
+}
+
 /* Consistent styling for form elements within panels */
 .panel-content label {
     display: block;
@@ -283,14 +296,28 @@ body {
 /* Color Palette Styling */
 .color-palette-container {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px; /* Increased space between swatches */
+    flex-direction: column; /* Stack groups vertically */
+    gap: 2px; /* Space between color groups - reduced for closer rows */
     margin-bottom: 20px; /* Increased space below the palette */
 }
 
+.color-palette-container h4 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: var(--text-color-medium);
+}
+
+.color-swatch-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* Space between swatches within a group */
+    justify-content: space-between; /* Distribute swatches evenly across the width */
+}
+
 .color-swatch {
-    width: 28px; /* Slightly larger swatch size */
-    height: 28px; /* Slightly larger swatch size */
+    width: 28px; /* Swatch size */
+    height: 28px; /* Swatch size */
     border-radius: 4px;
     cursor: pointer;
     border: 1px solid #ccc; /* Add a subtle border */
@@ -418,12 +445,12 @@ body {
 
 /* Style for over-capacity sprint header */
 .sprint-column-header.over-capacity-header {
-    border-bottom-color: var(--accent-green); /* Use accent color for border */
+    border-bottom-color: var(--danger-red); /* Use danger red for border */
 }
 
 /* Style for over-capacity story points text */
 .sprint-story-points.over-capacity {
-    color: var(--accent-green); /* Use accent color for text */
+    color: var(--danger-red); /* Use danger red for text */
     font-weight: bold; /* Make text bold */
 }
 
@@ -600,8 +627,8 @@ body {
 .task-card { /* Applying styles to the general task-card class */
     background-color: var(--card-background); /* Default, will be overridden by JS */
     border: 1px solid var(--border-color-light); /* Add a subtle border around the card */
-    padding: 6px 8px; /* Decreased internal padding */
-    margin-bottom: 6px; /* Decreased margin between cards */
+    padding: 4px 6px; /* Further decreased internal padding for compactness */
+    margin-bottom: 4px; /* Further decreased margin between cards for compactness */
     border-radius: 6px; /* Softer, modern border radius */
     box-shadow: 0 2px 4px var(--shadow-light); /* Subtle shadow */
     cursor: grab;
@@ -617,11 +644,11 @@ body {
     font-size: 0.9rem; /* Decreased font for name */
     font-weight: 600; /* Bolder name */
     color: var(--text-color-dark); /* Dark text for title */
-    margin: 0 0 4px 0; /* Decreased margin below name */
+    margin: 0 0 2px 0; /* Further decreased margin below name for compactness */
 }
 .task-card p { /* Style for paragraphs within task card */
     font-size: 0.75rem; /* Decreased font for details */
-    margin: 1px 0; /* Decreased vertical margin for compactness */
+    margin: 0; /* Removed vertical margin for compactness */
     color: var(--text-color-medium); /* Slightly muted text color for details */
     display: flex; /* Use flex for meta info */
     align-items: center;
@@ -675,7 +702,8 @@ body {
     border: 1px solid #ccc;
     cursor: pointer;
 }
-.sprint-name-edit {
+.sprint-name-edit,
+.sprint-capacity-edit {
     width: calc(100% - 10px);
     padding: 5px;
     font-size: 1.1rem; /* Match h3 */
@@ -761,7 +789,7 @@ body {
 /* Buttons */
 .btn {
     display: inline-block;
-    width: 100%; /* Make buttons full width in their context */
+    /* Removed width: 100%; to allow flexbox to control width more effectively */
     padding: 12px 20px;
     font-size: 16px;
     font-weight: 600;
@@ -831,11 +859,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* --- Settings Page Specific Styles --- */
 .settings-page-container {
     max-width: 900px;
-    margin: 30px auto;
+    margin: 0 auto; /* Center horizontally */
     padding: 20px;
     background-color: #FFF;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: flex; /* Enable flexbox */
+    flex-direction: column; /* Stack children vertically */
+    flex-grow: 1; /* Allow it to take available space */
+    min-height: 80vh; /* Ensure it takes up a good portion of the viewport height */
 }
 
 /* --- Tabs --- */
@@ -843,6 +875,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: flex;
     border-bottom: 2px solid #DEE2E6;
     margin-bottom: 20px;
+}
+
+.tab-content-area {
+    flex-grow: 1; /* Allow tab content area to take available vertical space */
+    overflow: hidden; /* Prevent content from overflowing the container */
+    display: flex; /* Make it a flex container for its children (tab-panes) */
+    flex-direction: column; /* Stack tab panes vertically */
 }
 
 .tab-link {
@@ -869,10 +908,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .tab-pane {
     display: none;
+    flex-direction: column; /* Enable flexbox for vertical layout */
+    height: 100%; /* Ensure pane takes full height of its container */
 }
 
 .tab-pane.active {
-    display: block;
+    display: flex; /* Use flex when active */
 }
 
 /* --- Section Styling within Tabs --- */
@@ -882,23 +923,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-bottom: 20px;
     border-bottom: 1px solid #EEE;
     padding-bottom: 10px;
-}
-
-.tab-pane h3 {
-    font-size: 18px;
-    margin-top: 25px;
-    margin-bottom: 10px;
-}
-
-.tab-pane p {
-    line-height: 1.6;
-    color: var(--text-color-medium);
+    flex-shrink: 0; /* Prevent heading from shrinking */
 }
 
 /* --- Item Lists (Epics, Teams, Templates) --- */
 .item-list {
     list-style: none;
     padding: 0;
+    overflow-y: auto; /* Add vertical scrollbar if content overflows */
+    max-height: 600px; /* Increased max-height */
+}
+
+.tab-pane p {
+    line-height: 1.6;
+    color: var(--text-color-medium);
 }
 
 .item-list li {
@@ -929,6 +967,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: flex;
     margin-top: 20px;
     gap: 10px;
+    flex-shrink: 0; /* Prevent form from shrinking */
 }
 
 .add-item-form input[type="text"] {

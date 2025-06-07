@@ -24,6 +24,7 @@ function _initializeModules() {
     TaskPropertyPanel.init();
     FeatureTemplateModal.init(); // Initialize the new modal
     SettingsView.init(); // Initialize the new settings view
+    AddSprintModal.init(); // Initialize the new Add Sprint Modal
     // PIObjectivesView.init(); // When available
 
     console.log("All core modules initialized.");

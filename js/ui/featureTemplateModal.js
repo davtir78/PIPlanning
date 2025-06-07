@@ -109,20 +109,41 @@ const FeatureTemplateModal = (() => {
         if (!colorPaletteContainer) return;
         colorPaletteContainer.innerHTML = ''; // Clear existing swatches
 
-        PREDEFINED_TASK_COLOR_VALUES.forEach(colorValue => {
+        // Theme Colors section
+        TASK_COLORS.themeColors.forEach(colorRow => {
+            const colorGroupDiv = createElement('div', 'color-swatch-group');
+            colorRow.forEach(colorValue => {
+                const swatch = createElement('div', 'color-swatch', { 'data-color': colorValue });
+                swatch.style.backgroundColor = colorValue;
+                swatch.title = colorValue; // Tooltip for individual swatch
+
+                swatch.addEventListener('click', () => {
+                    _setActiveColorSwatch(colorValue);
+                });
+                colorGroupDiv.appendChild(swatch);
+            });
+            colorPaletteContainer.appendChild(colorGroupDiv);
+        });
+
+        // Standard Colors section
+        const standardColorGroupDiv = createElement('div', 'color-swatch-group');
+        TASK_COLORS.standardColors.forEach(colorValue => {
             const swatch = createElement('div', 'color-swatch', { 'data-color': colorValue });
             swatch.style.backgroundColor = colorValue;
-            swatch.title = colorValue; 
+            swatch.title = colorValue; // Tooltip for individual swatch
 
             swatch.addEventListener('click', () => {
                 _setActiveColorSwatch(colorValue);
             });
-            colorPaletteContainer.appendChild(swatch);
+            standardColorGroupDiv.appendChild(swatch);
         });
+        colorPaletteContainer.appendChild(standardColorGroupDiv);
+
         // Set a default active swatch
-        if (PREDEFINED_TASK_COLOR_VALUES.length > 0) {
-            _setActiveColorSwatch(PREDEFINED_TASK_COLOR_VALUES[0]);
-        }
+        const defaultColor = (PREDEFINED_TASK_COLOR_VALUES && PREDEFINED_TASK_COLOR_VALUES.length > 0)
+                               ? PREDEFINED_TASK_COLOR_VALUES[0]
+                               : (defaultTaskColor || '#D3D3D3');
+        _setActiveColorSwatch(defaultColor);
     }
 
     /**
