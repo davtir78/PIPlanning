@@ -46,7 +46,7 @@ This is the primary task management interface, resembling a Kanban board:
 
 *   **Layout**: Displays a "Backlog" column and dynamic sprint columns arranged horizontally.
 *   **Sprint Columns**: Each column represents a PI sprint, showing its name, date range, and capacity (used points / total capacity). Over-capacity sprints are visually indicated.
-*   **Task Cards**: Tasks are displayed as cards within columns, showing Task Name, Story Points, Epic, Color Indicator, and Dependency Indicator (chain icon).
+*   **Task Cards**: Tasks are displayed as cards within columns, showing Task Name, Story Points, Epic and Color Indicator
 *   **Task Management**:
     *   "+ Add Task" buttons in Backlog and Sprint columns open the Task Property Panel.
     *   Clicking an existing task card opens the Task Property Panel for editing.
