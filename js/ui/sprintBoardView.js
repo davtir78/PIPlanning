@@ -2,6 +2,8 @@
 
 const SprintBoardView = (() => {
     let sprintBoardViewElement = null;
+    let currentFilterString = ''; // Stores the current filter string
+    let filterTimeout = null;    // For debouncing the filter input
 
     /**
      * Initializes the Sprint Board View.
@@ -214,6 +216,27 @@ const SprintBoardView = (() => {
         const backlogColumn = createElement('div', 'sprint-column backlog-column', { 'data-sprint-id': 'Backlog' }); // Corrected
         const backlogHeader = createElement('div', 'sprint-column-header'); // Corrected
         backlogHeader.appendChild(createElement('h3', 'sprint-name', null, 'Backlog')); // Corrected
+
+        // Add filter input field inside backlogHeader
+        const filterContainer = createElement('div', 'sprint-board-filter-container');
+        const filterInput = createElement('input', 'sprint-board-filter-input', {
+            type: 'text',
+            id: 'sprint-board-filter-input',
+            placeholder: 'Filter tasks by description, epic, or team...'
+        });
+        filterInput.value = currentFilterString; // Set initial value from state
+        filterContainer.appendChild(filterInput);
+        backlogHeader.appendChild(filterContainer); // Add filter inside backlogHeader
+
+        // Event listener for filter input (debounced)
+        filterInput.addEventListener('input', (event) => {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                currentFilterString = event.target.value.toLowerCase();
+                _renderInternal(); // Re-render the board with the new filter
+            }, 500); // Debounce for 500ms
+        });
+
         const addBacklogTaskButton = createElement('button', 'add-task-backlog-btn', null, '+ Add Task to Backlog'); // Corrected
         addBacklogTaskButton.addEventListener('click', () => {
             TaskPropertyPanel.openPanel(null, 'Backlog'); // Open panel for new task in Backlog
@@ -247,10 +270,24 @@ const SprintBoardView = (() => {
             columnsContainer.appendChild(createElement('p', null, null, 'No sprints available. Please add sprints or perform setup.')); // Corrected
         }
 
+        // Filter tasks based on currentFilterString
+        const filteredTasks = allTasks.filter(task => {
+            if (!currentFilterString) return true; // No filter applied
+
+            const taskName = task.name ? task.name.toLowerCase() : '';
+            const epic = epics.find(e => e.id === task.epicId);
+            const epicName = epic ? epic.name.toLowerCase() : '';
+            const dependentTeam = task.dependentTeam ? task.dependentTeam.toLowerCase() : '';
+
+            return taskName.includes(currentFilterString) ||
+                   epicName.includes(currentFilterString) ||
+                   dependentTeam.includes(currentFilterString);
+        });
+
         // Populate tasks into their respective columns (including backlog) and calculate initial story points
         if (sprints && sprints.length > 0) {
             sprints.forEach(sprint => {
-                const sprintTasks = allTasks.filter(task => task && task.sprintId === sprint.id);
+                const sprintTasks = filteredTasks.filter(task => task && task.sprintId === sprint.id);
                 let usedPoints = 0;
                 sprintTasks.forEach(task => {
                     usedPoints += (task.storyPoints || 0);
@@ -266,7 +303,7 @@ const SprintBoardView = (() => {
 
         // Populate backlog tasks
         const sprintIds = new Set(sprints.map(s => s.id));
-        const backlogTasks = tasks.filter(task => {
+        const backlogTasks = filteredTasks.filter(task => {
             if (!task) return false;
             // A task is in the backlog if it has no sprintId, its sprintId is 'Backlog',
             // or its sprintId points to a sprint that no longer exists.
@@ -548,5 +585,3 @@ const SprintBoardView = (() => {
         updateSprintStoryPointsDisplay: _updateSprintStoryPointsDisplay // Expose if needed externally
     };
 })();
-
-console.log("PI Planner sprintBoardView.js loaded and refactored.");

@@ -31,7 +31,7 @@ The task required allowing more granular story point values (0.25 and 0.5) in ad
     - Removed `height: 100%` from `.settings-page-container` and `.tab-pane` as `flex-grow` should handle height.
     - Added `flex-basis: 0` to `.item-list` to ensure `flex-grow` works as expected.
     - Added `flex-shrink: 0` to `.tab-pane h2` and `.add-item-form` to prevent them from shrinking and ensure `item-list` takes available space.
-    - Changed `margin: 30px auto;` to `margin: auto;` on `.settings-page-container` to remove vertical margin and allow full vertical expansion.
+    - Changed `margin: 30px auto;` to `margin: 0 auto;` on `.settings-page-container` to remove vertical margin and allow full vertical expansion.
 
 **Reasoning:**
 The user reported that when adding many teams or epics, the lists would go off-screen. By applying flexbox properties to the tab panes and making the item lists (`.item-list`) vertically scrollable, the content will now be contained within the visible area of the settings tab, improving usability. The iterative changes addressed various CSS properties that were preventing the scrollbars from appearing due to height containment issues within the flexbox layout.
@@ -120,3 +120,22 @@ The user requested an improved navigation bar with a tab-like design. The new st
 
 **Reasoning:**
 The user requested to move the "Add Sprint" button from the navigation bar to next to the last sprint. This change improves the user experience by placing the button in a more contextually relevant location within the Sprint Board view. Additionally, critical `ReferenceError` issues caused by incorrect script loading order and an unnecessary public API exposure were resolved.
+
+---
+
+### Task: Implement Filter Functionality on Sprint Board
+
+**Status:** Completed
+
+**Changes Made:**
+- Modified `js/ui/sprintBoardView.js`:
+    - Added `currentFilterString` and `filterTimeout` variables for managing filter state and debouncing.
+    - Implemented a filter input field (`sprint-board-filter-input`) within the `_renderInternal` function.
+    - **Updated placement:** The filter input is now placed inside the backlog column's header, between the "Backlog" title and the "Add Task to Backlog" button, as per user feedback.
+    - Added an `input` event listener to the filter field with a 500ms debounce, triggering `_renderInternal` to re-render the board with filtered tasks.
+    - Modified the task rendering logic in `_renderInternal` to filter tasks based on `currentFilterString` matching task name, epic name, or dependent team.
+- Modified `style.css`:
+    - Added styles for `.sprint-board-filter-container` and `.sprint-board-filter-input` to ensure proper visual integration and user experience.
+
+**Reasoning:**
+The user requested to add a filter functionality to the Sprint Board page and then provided feedback on its placement. This implementation provides a text input for filtering, debounces the input to optimize performance, and applies the filter across task descriptions, associated epics, and dependent teams, enhancing the usability of the sprint board. The placement has been adjusted to meet the user's specific requirements.

@@ -368,6 +368,35 @@ body {
     min-height: 0; /* Allow flex item to shrink below content size */
 }
 
+.sprint-board-filter-container {
+    padding: 10px 15px;
+    background-color: var(--column-background);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.sprint-board-filter-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color-medium);
+    border-radius: 5px;
+    font-size: 1rem;
+    color: var(--text-color-dark);
+    background-color: var(--card-background);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sprint-board-filter-input::placeholder {
+    color: var(--text-color-light);
+}
+
+.sprint-board-filter-input:focus {
+    outline: none;
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
+}
+
 .sprint-columns-container {
     display: flex; /* Arrange columns horizontally */
     flex-direction: row;
