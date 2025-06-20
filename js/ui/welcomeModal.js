@@ -32,9 +32,13 @@ const WelcomeModal = (() => {
      * @private
      */
     function _close() {
+        console.log("Attempting to close welcome modal.");
         if (welcomeModalElement) {
             welcomeModalElement.style.display = 'none';
             welcomeModalElement.innerHTML = ''; // Clear content after closing
+            console.log("Welcome modal hidden and content cleared.");
+        } else {
+            console.warn("welcomeModalElement is null or undefined when _close() was called.");
         }
         document.dispatchEvent(new CustomEvent('appDataInitialized'));
     }
@@ -124,7 +128,8 @@ const WelcomeModal = (() => {
 
             <div class="option-section">
                 <h2>Option 2: Import Data</h2>
-                <button type="button" id="import-xlsx-welcome-btn" class="btn btn-secondary">Import XLSX</button>
+                <button type="button" id="import-all-data-welcome-btn" class="btn btn-secondary">Import All Data (XLSX)</button>
+                <button type="button" id="import-jira-data-welcome-btn" class="btn btn-secondary">Import JIRA Data (XLSX)</button>
                 <a href="pi_planner_sample_data.xlsx" class="download-link" download="pi_planner_sample_data.xlsx">Download Sample Data (XLSX)</a>
             </div>
         `;
@@ -137,9 +142,10 @@ const WelcomeModal = (() => {
             quickSetupForm.addEventListener('submit', _handleQuickSetup);
         }
 
-        const importXlsxBtnWelcome = modalContainer.querySelector('#import-xlsx-welcome-btn');
-        if (importXlsxBtnWelcome) {
-            importXlsxBtnWelcome.addEventListener('click', () => {
+        // Event listener for "Import All Data" button
+        const importAllDataWelcomeBtn = modalContainer.querySelector('#import-all-data-welcome-btn');
+        if (importAllDataWelcomeBtn) {
+            importAllDataWelcomeBtn.addEventListener('click', () => {
                 // Create a hidden file input element
                 const fileInput = document.createElement('input');
                 fileInput.type = 'file';
@@ -151,14 +157,52 @@ const WelcomeModal = (() => {
 
                 fileInput.addEventListener('change', (event) => {
                     const file = event.target.files[0];
-                    ImportExport.importXLSX(file, () => {
-                        // On complete callback: close modal and re-render app
+                    // Call the generic importAllData function from ImportExport module with callbacks
+                    window.PIPlanner.ImportExport.importAllData(file, () => {
+                        // Success callback: close modal and re-render app
                         _close();
                         // Trigger a re-render of main app components
                         if (typeof SprintBoardView !== 'undefined') SprintBoardView.render();
                         if (typeof RoadmapView !== 'undefined') RoadmapView.renderRoadmapGrid();
                         if (typeof Header !== 'undefined') Header.updateHeaderCapacities();
                     }, (errorMessage) => {
+                        // Error callback: show alert
+                        alert(errorMessage);
+                    });
+                    // Clean up the dynamically created input
+                    document.body.removeChild(fileInput);
+                });
+
+                // Programmatically click the hidden file input to open the file dialog
+                fileInput.click();
+            });
+        }
+
+        // Event listener for "Import JIRA Data" button
+        const importJiraDataWelcomeBtn = modalContainer.querySelector('#import-jira-data-welcome-btn');
+        if (importJiraDataWelcomeBtn) {
+            importJiraDataWelcomeBtn.addEventListener('click', () => {
+                // Create a hidden file input element
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.xlsx, .xls';
+                fileInput.style.display = 'none'; // Hide it
+
+                // Append to body to make it part of the DOM
+                document.body.appendChild(fileInput);
+
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    // Call the importJIRA function from ImportExport module with callbacks
+                    window.PIPlanner.ImportExport.importJIRA(file, () => {
+                        // Success callback: close modal and re-render app
+                        _close();
+                        // Trigger a re-render of main app components
+                        if (typeof SprintBoardView !== 'undefined') SprintBoardView.render();
+                        if (typeof RoadmapView !== 'undefined') RoadmapView.renderRoadmapGrid();
+                        if (typeof Header !== 'undefined') Header.updateHeaderCapacities();
+                    }, (errorMessage) => {
+                        // Error callback: show alert
                         alert(errorMessage);
                     });
                     // Clean up the dynamically created input

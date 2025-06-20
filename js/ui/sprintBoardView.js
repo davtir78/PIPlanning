@@ -159,7 +159,8 @@ const SprintBoardView = (() => {
      */
     function _renderTaskCard(task, epics) { // Renamed components to epics
         const card = createElement('div', 'task-card', { 'data-task-id': task.id }); // Corrected
-        const cardColor = task.color || defaultTaskColor || '#D3D3D3'; // Get task color
+        // Use the globally defined DEFAULT_TASK_COLOR from config.js
+        const cardColor = task.color || window.DEFAULT_TASK_COLOR || '#D3D3D3'; // Get task color
 
         card.style.backgroundColor = cardColor; // Set background color of the entire card
 

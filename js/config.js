@@ -12,6 +12,9 @@ const LOCAL_STORAGE_KEY_FEATURE_TEMPLATES = 'piPlannerFeatureTemplates'; // New 
 const DEFAULT_SPRINT_CAPACITY = 40; // Story points
 const DEFAULT_SPRINT_LENGTH_WEEKS = 2; // Weeks
 
+// Default color for tasks if not specified (e.g., new tasks)
+const DEFAULT_TASK_COLOR = '#FFFFFF'; // White, from the themeColors palette
+
 const DEFAULT_EPICS = [ // Renamed from DEFAULT_COMPONENTS
     "Frontend",
     "Backend",
