@@ -1,6 +1,6 @@
 // PI Planner LocalStorage Interaction Module
 
-const Storage = (() => { // Assign the returned object to the global Storage variable
+window.Storage = (() => { // Assign the returned object to the global window.Storage variable
     // Constants from config.js (e.g., LOCAL_STORAGE_KEY_SPRINTS) are now globally available.
 
     /**
@@ -123,6 +123,16 @@ const Storage = (() => { // Assign the returned object to the global Storage var
     }
 
     /**
+     * Retrieves a single sprint by its name.
+     * @param {string} sprintName - The name of the sprint to retrieve.
+     * @returns {Sprint|null} The sprint object or null if not found.
+     */
+    function getSprintByName(sprintName) {
+        const sprints = getSprints();
+        return sprints.find(sprint => sprint.name === sprintName) || null;
+    }
+
+    /**
      * Retrieves tasks for a specific sprint ID.
      * @param {string} sprintId - The ID of the sprint.
      * @returns {Task[]} An array of tasks for that sprint.
@@ -180,6 +190,7 @@ const Storage = (() => { // Assign the returned object to the global Storage var
         saveFeatureTemplates, // Added public function
         getTaskById,
         getSprintById,
+        getSprintByName, // Added public function
         getTasksBySprintId,
         getEpicById, // Added getEpicById to public API
         clearAllData

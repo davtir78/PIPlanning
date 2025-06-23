@@ -1088,10 +1088,30 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-bottom: none;
 }
 
-#file-name-display {
+#file-name-display,
+#jira-file-name-display {
     margin-left: 10px;
     color: var(--text-color-light);
     font-style: italic;
+}
+
+/* Import/Export Grouping */
+.import-export-group {
+    border: 1px solid var(--border-color-medium);
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    background-color: var(--light-purple); /* Light background for the group */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.import-export-group legend {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--dark-purple);
+    padding: 0 10px;
+    background-color: var(--light-purple); /* Match fieldset background */
+    border-radius: 4px;
 }
 
 
