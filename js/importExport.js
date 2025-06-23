@@ -279,77 +279,106 @@
     /**
      * Exports current PI Planner data to an XLSX file with multiple sheets,
      * formatted for JIRA where applicable (Tasks, Epics) and raw for others.
+     *
+     * This function gathers all relevant data from the application's storage
+     * (tasks, epics, sprints, dependent teams, and feature templates) and
+     * organizes it into separate sheets within a single XLSX workbook.
+     *
+     * The sheets are structured as follows:
+     * - 'JIRA Tasks': Contains task-related data formatted for JIRA import,
+     *   including issue type, key, summary, story points, epic link, sprint name,
+     *   issue color, and dependent team.
+     * - 'JIRA Epics': Contains epic-related data formatted for JIRA,
+     *   including issue type, key, and summary.
+     * - 'Sprints': Contains raw sprint data.
+     * - 'Dependent Teams': Contains a list of dependent team names.
+     * - 'Feature Templates': Contains a list of feature template names.
+     *
+     * If no data is available for export, an alert is displayed.
+     * Upon successful export, an XLSX file named 'PIPlanner_JIRA_Export_MultiSheet.xlsx'
+     * is downloaded, and a success alert is shown to the user.
      */
     function exportJIRA() {
+        // Retrieve all necessary data from Storage
         const tasks = Storage.getTasks();
         const epics = Storage.getEpics();
         const sprints = Storage.getSprints();
         const dependentTeams = Storage.getDependentTeams();
         const featureTemplates = Storage.getFeatureTemplates();
 
+        // Create a new workbook instance
         const workbook = XLSX.utils.book_new();
 
-        // Sheet 1: JIRA Tasks
+        // --- Sheet 1: JIRA Tasks ---
+        // Map task data to a JIRA-friendly format for export
         const jiraTasksData = tasks.map(task => {
+            // Look up sprint name using sprintId from Storage
             const sprint = task.sprintId ? Storage.getSprintById(task.sprintId) : null;
-            const sprintName = sprint ? sprint.name : ''; // Get sprint name from sprintId
+            const sprintName = sprint ? sprint.name : '';
 
             return {
-                'Issue Type': task.issueType || 'Story',
+                'Issue Type': task.issueType || 'Story', // Default to 'Story' if not specified
                 'Issue key': task.id,
                 'Summary': task.name,
                 'Story Points': task.storyPoints,
-                'Epic Link': task.epicId || '',
-                'Sprint': sprintName, // Use looked-up sprint name
-                'Custom field (Issue color)': task.color || '', // Export task color
+                'Epic Link': task.epicId || '', // Link to epic if available
+                'Sprint': sprintName, // Use the resolved sprint name
+                'Custom field (Issue color)': task.color || '', // Export custom issue color
                 'Custom field (Dependent Team)': task.dependentTeam || '' // Export dependent team
-                // Status, Assignee, Reporter, Created, Updated, Due Date, Labels remain removed as per previous feedback
+                // Other JIRA fields (Status, Assignee, Reporter, Created, Updated, Due Date, Labels)
+                // are intentionally omitted based on previous feedback/requirements.
             };
         });
+        // Add 'JIRA Tasks' sheet to the workbook if there is data
         if (jiraTasksData.length > 0) {
             const worksheet = XLSX.utils.json_to_sheet(jiraTasksData);
             XLSX.utils.book_append_sheet(workbook, worksheet, 'JIRA Tasks');
         }
 
-        // Sheet 2: JIRA Epics
+        // --- Sheet 2: JIRA Epics ---
+        // Map epic data to a JIRA-friendly format for export
         const jiraEpicsData = epics.map(epic => ({
             'Issue Type': 'Epic',
             'Issue key': epic.id,
             'Summary': epic.name
-            // Removed Story Points, Epic Link, Sprint, Status, Assignee, Reporter, Created, Updated, Due Date, Labels as per user feedback
+            // Other JIRA fields for epics are omitted as per feedback.
         }));
+        // Add 'JIRA Epics' sheet to the workbook if there is data
         if (jiraEpicsData.length > 0) {
             const worksheet = XLSX.utils.json_to_sheet(jiraEpicsData);
             XLSX.utils.book_append_sheet(workbook, worksheet, 'JIRA Epics');
         }
 
-        // Sheet 3: Sprints (raw data)
+        // --- Sheet 3: Sprints (raw data) ---
+        // Export raw sprint data as is
         if (sprints.length > 0) {
             const worksheet = XLSX.utils.json_to_sheet(sprints);
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Sprints');
         }
 
-        // Sheet 4: Dependent Teams (raw data)
+        // --- Sheet 4: Dependent Teams (raw data) ---
+        // Convert array of strings to array of objects for XLSX export
         if (dependentTeams.length > 0) {
-            // Dependent teams are stored as an array of strings, convert to array of objects for XLSX
             const teamsForSheet = dependentTeams.map(team => ({ 'Team Name': team }));
             const worksheet = XLSX.utils.json_to_sheet(teamsForSheet);
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Dependent Teams');
         }
 
-        // Sheet 5: Feature Templates (raw data)
+        // --- Sheet 5: Feature Templates (raw data) ---
+        // Convert array of strings to array of objects for XLSX export
         if (featureTemplates.length > 0) {
-            // Feature templates are stored as an array of strings, convert to array of objects for XLSX
             const templatesForSheet = featureTemplates.map(template => ({ 'Template Name': template }));
             const worksheet = XLSX.utils.json_to_sheet(templatesForSheet);
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Feature Templates');
         }
 
+        // Check if any sheets were added to the workbook
         if (workbook.SheetNames.length === 0) {
             alert('No data to export.');
             return;
         }
 
+        // Write the workbook to an XLSX file and trigger download
         XLSX.writeFile(workbook, 'PIPlanner_JIRA_Export_MultiSheet.xlsx');
         alert('JIRA data exported successfully to multiple sheets!');
     }
