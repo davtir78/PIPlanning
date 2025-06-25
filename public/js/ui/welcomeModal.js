@@ -128,7 +128,6 @@ const WelcomeModal = (() => {
 
             <div class="option-section">
                 <h2>Option 2: Import Data</h2>
-                <button type="button" id="import-all-data-welcome-btn" class="btn btn-secondary">Import All Data (XLSX)</button>
                 <button type="button" id="import-jira-data-welcome-btn" class="btn btn-secondary">Import JIRA Data (XLSX)</button>
                 <a href="pi_planner_sample_data.xlsx" class="download-link" download="pi_planner_sample_data.xlsx">Download Sample Data (XLSX)</a>
             </div>
@@ -140,42 +139,6 @@ const WelcomeModal = (() => {
         const quickSetupForm = modalContainer.querySelector('#quick-setup-form');
         if (quickSetupForm) {
             quickSetupForm.addEventListener('submit', _handleQuickSetup);
-        }
-
-        // Event listener for "Import All Data" button
-        const importAllDataWelcomeBtn = modalContainer.querySelector('#import-all-data-welcome-btn');
-        if (importAllDataWelcomeBtn) {
-            importAllDataWelcomeBtn.addEventListener('click', () => {
-                // Create a hidden file input element
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = '.xlsx, .xls';
-                fileInput.style.display = 'none'; // Hide it
-
-                // Append to body to make it part of the DOM
-                document.body.appendChild(fileInput);
-
-                fileInput.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    // Call the generic importAllData function from ImportExport module with callbacks
-                    window.PIPlanner.ImportExport.importAllData(file, () => {
-                        // Success callback: close modal and re-render app
-                        _close();
-                        // Trigger a re-render of main app components
-                        if (typeof SprintBoardView !== 'undefined') SprintBoardView.render();
-                        if (typeof RoadmapView !== 'undefined') RoadmapView.renderRoadmapGrid();
-                        if (typeof Header !== 'undefined') Header.updateHeaderCapacities();
-                    }, (errorMessage) => {
-                        // Error callback: show alert
-                        alert(errorMessage);
-                    });
-                    // Clean up the dynamically created input
-                    document.body.removeChild(fileInput);
-                });
-
-                // Programmatically click the hidden file input to open the file dialog
-                fileInput.click();
-            });
         }
 
         // Event listener for "Import JIRA Data" button
@@ -219,43 +182,6 @@ const WelcomeModal = (() => {
         if (piStartDateInput) {
             piStartDateInput.value = new Date().toISOString().split('T')[0];
         }
-    }
-
-    /**
-     * Handles the quick setup form submission.
-     * @param {Event} event - The form submission event.
-     * @private
-     */
-    function _handleQuickSetup(event) {
-        event.preventDefault();
-        const form = event.target;
-        // Use new IDs for form elements
-        const piStartDate = form.elements['piStartDate'].value;
-        const sprintLength = parseInt(form.elements['sprintLength'].value, 10);
-        const teamCapacity = parseInt(form.elements['teamCapacity'].value, 10);
-
-        if (!piStartDate) {
-            alert("Please select a PI Start Date.");
-            return;
-        }
-        const today = new Date().toISOString().split('T')[0];
-        if (piStartDate < today) {
-            alert("PI Start Date cannot be in the past.");
-            return;
-        }
-        if (isNaN(sprintLength) || sprintLength <= 0) {
-            alert("Sprint Length must be a positive number.");
-            return;
-        }
-        if (isNaN(teamCapacity) || teamCapacity <= 0) {
-            alert("Team Capacity must be a positive number.");
-            return;
-        }
-
-        // Assuming InitialSetup.performQuickSetup is available (from js/data/initialSetup.js)
-        performQuickSetup(new Date(piStartDate), sprintLength, teamCapacity, 6); // Pass 6 for numberOfSprints
-        alert("Quick setup complete! Your PI Planner is ready.");
-        _close();
     }
 
     // Call _init internally or ensure it's called by main.js

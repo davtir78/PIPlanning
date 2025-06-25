@@ -85,4 +85,4 @@ const DEFAULT_FEATURE_TASK_POINTS = 3;
 
 
 // Add more configuration constants as needed
-console.log("PI Planner config.js loaded.");
+console.log("PI Planner config.js loaded and constants defined.");

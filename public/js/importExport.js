@@ -8,9 +8,6 @@
 (function() {
     'use strict';
 
-    // Dependencies
-    const Storage = window.Storage; // Access the global Storage module
-
     // --- Private Functions ---
 
     /**
@@ -530,6 +527,8 @@
 
                 // Save data to Storage in correct order
                 console.log('Saving imported data to Storage...');
+                // Access Storage here to ensure it's fully initialized
+                const Storage = window.Storage; 
                 Storage.saveSprints(tempSprints);
                 console.log('Sprints saved:', tempSprints.length);
                 Storage.saveEpics(finalEpics); // Save finalEpics with linked tasks

@@ -1,7 +1,15 @@
 // PI Planner LocalStorage Interaction Module
 
+// PI Planner LocalStorage Interaction Module
+
 window.Storage = (() => { // Assign the returned object to the global window.Storage variable
     // Constants from config.js (e.g., LOCAL_STORAGE_KEY_SPRINTS) are now globally available.
+    console.log("storage.js: Initializing Storage module.");
+    if (typeof LOCAL_STORAGE_KEY_SPRINTS === 'undefined') {
+        console.error("storage.js: LOCAL_STORAGE_KEY_SPRINTS is UNDEFINED at Storage module initialization!");
+    } else {
+        console.log("storage.js: LOCAL_STORAGE_KEY_SPRINTS is DEFINED at Storage module initialization.");
+    }
 
     /**
      * Retrieves an item from localStorage and parses it as JSON.
@@ -167,7 +175,7 @@ window.Storage = (() => { // Assign the returned object to the global window.Sto
         console.log("All PI Planner data cleared from localStorage.");
     }
 
-    console.log("PI Planner storage.js loaded.");
+    console.log("PI Planner storage.js module fully loaded.");
 
     // Public API
     return {
