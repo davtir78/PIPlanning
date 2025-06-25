@@ -27,7 +27,7 @@ PI Planner is a single-page HTML web application designed for Program Increment 
 This is the first screen users see if no data is found in local storage. It provides two options to get started:
 
 *   **Quick Setup**: Allows users to generate initial PI data (sprints, epics) by defining a PI start date, sprint length, and team capacity.
-*   **Import Data**: Enables users to import existing application data from a JSON file.
+*   **Import Data**: Enables users to import existing application data from a XLSX file.
 
 ### 2. Header & Navigation
 
@@ -69,7 +69,7 @@ The settings view provides various tabs for managing application configurations:
 *   **Epics Tab**: Allows users to add, edit, and delete Epics, which are used to categorize tasks.
 *   **Teams Tab**: Manages Dependent Teams, which can be assigned to tasks to indicate dependencies.
 *   **Templates Tab**: Enables users to manage feature task templates (add, edit, delete) for quick task creation.
-*   **Import/Export Tab**: Provides functionality to import all application data from a JSON file or export it to a JSON file.
+*   **Import/Export Tab**: Provides functionality to import all application data from an XLSX file or export it to an XLSX file.
 *   **Danger Zone Tab**: Contains options like "Clear All Data" (with confirmation) to reset the application.
 
 ### 6. Task Property Panel

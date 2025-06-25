@@ -11,6 +11,13 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "redirects": [
+      {
+        "source": "/ads.txt",
+        "destination": "https://srv.adstxtmanager.com/19390/piplanner.net",
+        "type": 301
+      }
     ]
   }
 }

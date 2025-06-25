@@ -57,6 +57,7 @@ const SettingsView = (() => {
                     <button class="tab-link" data-tab="import-export">Import/Export</button>
                     <button class="tab-link" data-tab="danger-zone">Danger Zone</button>
                     <button class="tab-link" data-tab="about">About</button>
+                    <button class="tab-link" data-tab="privacy-policy">Privacy Policy</button>
                 </nav>
 
                 <div class="tab-content-area">
@@ -126,11 +127,15 @@ const SettingsView = (() => {
                         <h2>About PI Planner</h2>
                         <div id="readme-content"></div>
                     </div>
+
+                    <!-- Privacy Policy Tab Content -->
+                    <div id="privacy-policy-tab" class="tab-pane">
+                        <h2>Privacy Policy</h2>
+                        <div id="privacy-policy-content"></div>
+                    </div>
                 </div>
             </div>
         `;
-
-        // ... existing code ...
 
         // Render README.md content
         const readmeContentDiv = settingsViewEl.querySelector('#readme-content');
@@ -223,6 +228,24 @@ This modal is used when adding a task from a predefined template:
 *   **Functionality**: Fetches and displays user-configured feature templates from storage, allowing quick creation of tasks based on these templates.
 `;
             readmeContentDiv.innerHTML = marked.parse(readmeMarkdown);
+        }
+
+        // Load Privacy Policy content
+        const privacyPolicyContentDiv = settingsViewEl.querySelector('#privacy-policy-content');
+        if (privacyPolicyContentDiv) {
+            fetch('privacy-policy.html')
+                .then(response => response.text())
+                .then(html => {
+                    // Extract only the body content from the fetched HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const bodyContent = doc.body.innerHTML;
+                    privacyPolicyContentDiv.innerHTML = bodyContent;
+                })
+                .catch(error => {
+                    console.error('Error loading privacy policy:', error);
+                    privacyPolicyContentDiv.innerHTML = '<p>Error loading privacy policy. Please try again later.</p>';
+                });
         }
 
         const epics = Storage.getEpics();

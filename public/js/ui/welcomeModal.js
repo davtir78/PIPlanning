@@ -90,11 +90,14 @@ const WelcomeModal = (() => {
 
         welcomeModalElement.innerHTML = ''; // Clear previous content
 
-        const modalContainer = createElement('div', 'modal-container'); // Use new container class
-        // Use Config.DEFAULT_SPRINT_CAPACITY
-        const defaultCapacity = DEFAULT_SPRINT_CAPACITY || 40; // Corrected
-        modalContainer.innerHTML = `
+    const modalContainer = createElement('div', 'modal-container'); // Use new container class
+    // Use Config.DEFAULT_SPRINT_CAPACITY
+    const defaultCapacity = DEFAULT_SPRINT_CAPACITY || 40; // Corrected
+    modalContainer.innerHTML = `
             <h1>Welcome to PI Planner</h1>
+            <p class="subtitle">PI Planner is a simple, client-side web application designed to help agile teams with Program Increment (PI) planning. It provides a visual way to organize tasks, manage sprints, track epics, and visualize your roadmap.</p>
+            <p class="subtitle"><strong>How it works:</strong> All your data is stored directly in your browser's local storage, meaning it's private to you and never leaves your device. You can easily import/export your data for backup or sharing.</p>
+            <p class="subtitle"><strong>Getting Started:</strong> Choose between a quick setup to generate initial sprints and capacity, or import existing data from a JIRA-compatible XLSX file.</p>
             <p class="subtitle">Get started by setting up your Program Increment.</p>
 
             <div class="option-section">
@@ -135,6 +138,9 @@ const WelcomeModal = (() => {
 
         welcomeModalElement.appendChild(modalContainer); // Append the new container
         welcomeModalElement.style.display = 'flex'; // Keep flex for centering
+
+        // Update the max-width of the modal container
+        modalContainer.style.maxWidth = '960px'; // Twice as wide as 480px
 
         const quickSetupForm = modalContainer.querySelector('#quick-setup-form');
         if (quickSetupForm) {

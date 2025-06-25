@@ -55,6 +55,27 @@ function _showInitialView() {
  */
 function initializeApp() {
     console.log("Initializing PI Planner Application...");
+
+    // Ad Banner Toggle
+    const adBanner = document.getElementById('collapsible-ad-banner');
+    const toggleButton = document.getElementById('toggle-ad-banner');
+
+    if (adBanner && toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            adBanner.classList.toggle('collapsed');
+            if (adBanner.classList.contains('collapsed')) {
+                toggleButton.textContent = 'Show Ad';
+            } else {
+                toggleButton.textContent = 'Hide Ad';
+            }
+        });
+    }
+
+    // Initialize Ezoic ad placements
+    ezstandalone.cmd.push(function () {
+        ezstandalone.showAds(103); // Assuming 103 is the ID for the top_of_page ad
+    });
+
     _initializeModules();
 
     // Check if essential data exists (e.g., sprints from Storage)

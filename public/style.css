@@ -1148,3 +1148,34 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-color: #C82333;
     border-color: #BD2130;
 }
+
+/* Collapsible Ad Banner Styles */
+#collapsible-ad-banner {
+    background-color: #f0f0f0; /* Light background for the banner */
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    overflow: hidden; /* Hide overflow when collapsed */
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out; /* Smooth transition */
+    max-height: 200px; /* Max height when expanded (adjust as needed for ad size) */
+}
+
+#collapsible-ad-banner.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+#collapsible-ad-banner #toggle-ad-banner {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#collapsible-ad-banner #toggle-ad-banner:hover {
+    background-color: #0056b3;
+}
