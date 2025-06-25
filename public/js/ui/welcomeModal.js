@@ -51,9 +51,9 @@ const WelcomeModal = (() => {
     function _handleQuickSetup(event) {
         event.preventDefault();
         const form = event.target;
-        const piStartDate = form.elements['pi-start-date'].value;
-        const sprintLength = parseInt(form.elements['sprint-length'].value, 10);
-        const teamCapacity = parseInt(form.elements['team-capacity'].value, 10);
+        const piStartDate = form.elements['piStartDate'].value;
+        const sprintLength = parseInt(form.elements['sprintLength'].value, 10);
+        const teamCapacity = parseInt(form.elements['teamCapacity'].value, 10);
 
         if (!piStartDate) {
             alert("Please select a PI Start Date.");

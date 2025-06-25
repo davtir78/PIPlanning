@@ -838,7 +838,6 @@ This modal is used when adding a task from a predefined template:
         window.PIPlanner.ImportExport.importJIRA(file, () => {
             // On complete callback: re-render views
             if (typeof SprintBoardView !== 'undefined') SprintBoardView.render();
-            if (typeof GanttView !== 'undefined') GanttView.show();
             renderSettings(); // Re-render settings view itself
             if (typeof Header !== 'undefined') Header.updateHeaderCapacities();
         }, (errorMessage) => {

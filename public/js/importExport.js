@@ -165,96 +165,78 @@
 
                 let importedTasks = [];
                 let importedEpics = [];
-                let importedSprints = [];
+                let importedSprints = []; // Collect all sprints first
                 let importedDependentTeams = [];
                 let importedFeatureTemplates = [];
 
+                // --- FIRST PASS: Collect all data, especially sprints ---
                 workbook.SheetNames.forEach(sheetName => {
                     const worksheet = workbook.Sheets[sheetName];
                     const json = XLSX.utils.sheet_to_json(worksheet);
-                    console.log(`Processing sheet: ${sheetName}, rows: ${json.length}`);
-
-                    // Normalize sheet name for robust matching (trim whitespace and convert to lowercase)
                     const normalizedSheetName = sheetName.trim().toLowerCase();
 
                     switch (normalizedSheetName) {
                         case 'jira tasks':
-                            // _parseJIRAData is designed for a flat list of JIRA issues.
-                            // It will extract tasks and derive epics/sprints from them.
-                            // We'll use its task parsing, but handle epics/sprints from dedicated sheets if available.
-                            const { tasks: parsedTasks, epics: derivedEpics, sprints: derivedSprints } = _parseJIRAData(json);
-                            importedTasks = importedTasks.concat(parsedTasks);
-                            // For derived epics/sprints, only add if not already present from a dedicated sheet
+                            // Temporarily parse tasks to extract derived sprints and epics
+                            // We'll re-process tasks later after sprints are saved
+                            const { epics: derivedEpics, sprints: derivedSprints } = _parseJIRAData(json);
                             derivedEpics.forEach(epic => {
                                 if (!importedEpics.some(e => e.id === epic.id)) importedEpics.push(epic);
                             });
                             derivedSprints.forEach(sprint => {
                                 if (!importedSprints.some(s => s.id === sprint.id)) importedSprints.push(sprint);
                             });
-                            console.log(`Parsed ${parsedTasks.length} tasks from '${sheetName}' sheet.`);
                             break;
                         case 'jira epics':
-                            // Directly map from 'JIRA Epics' sheet, assuming it contains full epic objects
-                            // This data should take precedence over epics derived from tasks.
                             importedEpics = importedEpics.concat(json.map(row => ({
                                 id: row['Issue key'],
                                 name: row['Summary'],
                                 description: row['Summary'],
                                 status: row['Status'] || 'Planned',
                                 storyPoints: parseFloat(row['Story Points']) || 0,
-                                tasks: [] // Tasks will be linked via task.epicId
+                                tasks: []
                             })));
-                            console.log(`Parsed ${json.length} epics from '${sheetName}' sheet.`);
                             break;
                         case 'sprints':
-                            // Directly map from 'Sprints' sheet, assuming it contains full sprint objects
                             importedSprints = importedSprints.concat(json);
-                            console.log(`Parsed ${json.length} sprints from '${sheetName}' sheet.`);
                             break;
                         case 'dependent teams':
-                            // Assuming 'Dependent Teams' sheet contains objects like { 'Team Name': '...' }
                             importedDependentTeams = importedDependentTeams.concat(json.map(row => row['Team Name']));
-                            console.log(`Parsed ${json.length} dependent teams from '${sheetName}' sheet.`);
                             break;
                         case 'feature templates':
-                            // Assuming 'Feature Templates' sheet contains objects like { 'Template Name': '...' }
                             importedFeatureTemplates = importedFeatureTemplates.concat(json.map(row => row['Template Name']));
-                            console.log(`Parsed ${json.length} feature templates from '${sheetName}' sheet.`);
                             break;
                         default:
                             console.warn(`Unknown sheet name encountered during JIRA import: ${sheetName}. Skipping.`);
                     }
                 });
 
-                // Log data before saving for debugging
-                console.log('--- Data before saving to Storage ---');
-                console.log('Imported Sprints:', importedSprints);
-                console.log('Imported Epics:', importedEpics);
-                console.log('Imported Tasks:', importedTasks);
-                console.log('Imported Dependent Teams:', importedDependentTeams);
-                console.log('Imported Feature Templates:', importedFeatureTemplates);
-                console.log('------------------------------------');
-
-                // Save data to Storage in correct order
-                console.log('Saving imported data to Storage...');
+                // --- CRITICAL STEP: Save all collected sprints to Storage NOW ---
                 Storage.saveSprints(importedSprints);
-                console.log('Sprints saved:', importedSprints.length);
+
+                // --- SECOND PASS: Process tasks, now that sprints are in Storage ---
+                workbook.SheetNames.forEach(sheetName => {
+                    const worksheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+                    const normalizedSheetName = sheetName.trim().toLowerCase();
+
+                    if (normalizedSheetName === 'jira tasks') {
+                        const { tasks: parsedTasks } = _parseJIRAData(json); // _parseJIRAData will now find sprints
+                        importedTasks = importedTasks.concat(parsedTasks);
+                    }
+                });
+
+                // --- FINAL SAVE: Save remaining data ---
                 Storage.saveEpics(importedEpics);
-                console.log('Epics saved:', importedEpics.length);
                 Storage.saveTasks(importedTasks);
-                console.log('Tasks saved:', importedTasks.length);
                 Storage.saveDependentTeams(importedDependentTeams);
-                console.log('Dependent Teams saved:', importedDependentTeams.length);
                 Storage.saveFeatureTemplates(importedFeatureTemplates);
-                console.log('Feature Templates saved:', importedFeatureTemplates.length);
 
                 alert('JIRA data imported successfully!');
-                // Execute callback if provided
                 if (callback && typeof callback === 'function') {
                     callback();
                 }
-                // Trigger UI refresh if necessary
-                window.dispatchEvent(new CustomEvent('dataUpdated'));
+                window.location.href = 'index.html';
             } catch (error) {
                 console.error('Error processing JIRA XLSX workbook:', error);
                 alert('Failed to import JIRA data. Please ensure it is a valid XLSX file with correct sheet names.');
