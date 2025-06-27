@@ -746,7 +746,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 480px; /* Max width of the modal */
+    max-width: 550px; /* Increased max width for better button fit */
     box-sizing: border-box;
 }
 
@@ -854,6 +854,36 @@ body {
 }
 .btn-secondary:active {
     transform: translateY(1px);
+}
+
+/* Styling for buttons within the welcome modal to ensure consistent sizing */
+/* Apply to buttons directly within modal-container or modal-step-content */
+.modal-container .btn:not(.modal-footer .btn) { /* Exclude footer buttons from this rule */
+    max-width: 250px; /* Set a max-width for consistency */
+    width: 100%; /* Allow them to take full width up to max-width */
+    margin-left: auto; /* Center the button */
+    margin-right: auto; /* Center the button */
+}
+
+/* Ensure option-section buttons are centered and take full width up to max-width */
+.modal-container .option-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+    gap: 10px; /* Space between button and text */
+}
+
+.welcome-next-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px; /* Add some space above the button */
+}
+
+/* Ensure modal-footer buttons retain their equal width behavior */
+.modal-footer .btn {
+    flex: 1 1 0%; /* Make buttons take equal width */
+    min-width: 100px; /* Ensure buttons don't shrink too much */
+    width: auto; /* Reset width to allow flex to control it */
 }
 
 /* Section Divider */
@@ -1178,4 +1208,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 #collapsible-ad-banner #toggle-ad-banner:hover {
     background-color: #0056b3;
+}
+
+/* Responsive adjustments for Welcome Modal */
+@media (max-width: 768px) {
+    .modal-container {
+        max-width: 90%; /* Allow modal to take up more width on smaller screens */
+        padding: 20px 25px; /* Reduce padding for smaller screens */
+    }
+
+    .modal-container h1 {
+        font-size: 24px; /* Smaller font size for mobile */
+    }
+
+    .modal-container .subtitle {
+        font-size: 14px; /* Smaller font size for mobile */
+    }
 }
