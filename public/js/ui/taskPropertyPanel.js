@@ -13,6 +13,7 @@ const TaskPropertyPanel = (() => {
     // let taskColorInput = null; // Original input, will be replaced by palette
     let taskColorPaletteContainer = null; // New container for swatches
     let selectedTaskColorValueInput = null; // Hidden input to store selected color
+    let trafficLightPanelContainer = null; // Container for traffic light selector
     let saveTaskBtn = null;
     let cancelTaskBtn = null;
     let deleteTaskBtn = null; // Added delete button reference
@@ -79,6 +80,7 @@ const TaskPropertyPanel = (() => {
             taskEpicSelect.value = taskToEdit.epicId || ''; // Renamed from taskComponentSelect.value = taskToEdit.componentId
             taskDependentTeamSelect.value = taskToEdit.dependentTeam || '';
             _setActiveColorSwatch(taskToEdit.color || PREDEFINED_TASK_COLOR_VALUES[0] || '#D3D3D3');
+            _setActiveTrafficLight(taskToEdit.trafficLightStatus || null);
             taskTargetSprintIdInput.value = taskToEdit.sprintId || 'Backlog';
             if (deleteTaskBtn) deleteTaskBtn.style.display = 'inline-block';
             if (duplicateTaskBtn) duplicateTaskBtn.style.display = 'inline-block'; // Show duplicate button
@@ -93,6 +95,7 @@ const TaskPropertyPanel = (() => {
                                    ? PREDEFINED_TASK_COLOR_VALUES[0]
                                    : (defaultTaskColor || '#D3D3D3');
             _setActiveColorSwatch(defaultColor);
+            _setActiveTrafficLight(null); // Default to no traffic light for new tasks
             taskTargetSprintIdInput.value = targetSprintId;
             if (deleteTaskBtn) deleteTaskBtn.style.display = 'none';
             if (duplicateTaskBtn) duplicateTaskBtn.style.display = 'none'; // Hide duplicate button
@@ -151,6 +154,7 @@ const TaskPropertyPanel = (() => {
         const epicId = taskEpicSelect.value; // Renamed from componentId
         const color = selectedTaskColorValueInput.value;
         const dependentTeam = taskDependentTeamSelect.value;
+        const trafficLightStatus = _getActiveTrafficLight();
 
         if (!name) {
             alert("Task Name is required.");
@@ -182,6 +186,7 @@ const TaskPropertyPanel = (() => {
                 task.epicId = epicId; // Renamed from task.componentId
                 task.color = color;
                 task.dependentTeam = dependentTeam;
+                task.trafficLightStatus = trafficLightStatus;
             } else {
                 console.error("Task to edit not found with ID:", id);
                 return;
@@ -190,6 +195,7 @@ const TaskPropertyPanel = (() => {
             const newTaskId = generateUniqueId();
             const sprintIdForNewTask = taskTargetSprintIdInput.value || 'Backlog';
             task = new Task(name, storyPoints, epicId, sprintIdForNewTask, color, dependentTeam, newTaskId); // Renamed componentId to epicId
+            task.trafficLightStatus = trafficLightStatus;
         }
 
         let allTasks = Storage.getTasks();
@@ -271,6 +277,7 @@ const TaskPropertyPanel = (() => {
         taskDependentTeamSelect = document.getElementById('task-dependent-team-select');
         taskColorPaletteContainer = document.getElementById('task-color-palette-container');
         selectedTaskColorValueInput = document.getElementById('selected-task-color-value');
+        trafficLightPanelContainer = document.getElementById('task-traffic-light-container');
         saveTaskBtn = document.getElementById('save-task-btn');
         cancelTaskBtn = document.getElementById('cancel-task-btn');
         deleteTaskBtn = document.getElementById('delete-task-btn');
@@ -290,6 +297,7 @@ const TaskPropertyPanel = (() => {
 
         console.log("All critical Task Property Panel elements found.");
         _populateColorPalette();
+        _populateTrafficLightSelector();
 
         closeTaskPanelBtn.addEventListener('click', () => {
             console.log("Close button clicked.");
@@ -417,6 +425,57 @@ const TaskPropertyPanel = (() => {
                 sw.classList.remove('active-swatch');
             }
         });
+    }
+
+    /**
+     * Populates the traffic light selector with red, amber, and green options.
+     * @private
+     */
+    function _populateTrafficLightSelector() {
+        if (!trafficLightPanelContainer) return;
+        
+        // The HTML already has the structure, so we just need to add event listeners
+        const trafficLightOptions = trafficLightPanelContainer.querySelectorAll('.traffic-light-panel-option');
+        
+        trafficLightOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const status = option.dataset.status;
+                _setActiveTrafficLight(status === 'none' ? null : status);
+            });
+        });
+    }
+
+    /**
+     * Sets the active traffic light and updates the visual state.
+     * @param {string|null} status - The traffic light status ('red', 'amber', 'green', or null).
+     * @private
+     */
+    function _setActiveTrafficLight(status) {
+        if (!trafficLightPanelContainer) return;
+
+        const options = trafficLightPanelContainer.querySelectorAll('.traffic-light-panel-option');
+        options.forEach(option => {
+            const optionStatus = option.dataset.status;
+            if ((status === null && optionStatus === 'none') || (status === optionStatus)) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+
+        // Store the traffic light status in a hidden input or data attribute
+        trafficLightPanelContainer.dataset.activeStatus = status || '';
+    }
+
+    /**
+     * Gets the currently active traffic light status.
+     * @returns {string|null} The active traffic light status ('red', 'amber', 'green', or null).
+     * @private
+     */
+    function _getActiveTrafficLight() {
+        if (!trafficLightPanelContainer) return null;
+        const activeStatus = trafficLightPanelContainer.dataset.activeStatus;
+        return activeStatus === '' ? null : activeStatus;
     }
 
 

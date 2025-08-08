@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PI Planner</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.2">
     <!-- SortableJS via CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <!-- Marked.js via CDN for Markdown rendering -->
@@ -16,12 +16,6 @@
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <div id="collapsible-ad-banner">
-        <!-- Ezoic - top_of_page - top_of_page -->
-        <div id="ezoic-pub-ad-placeholder-103"></div>
-        <!-- End Ezoic - top_of_page - top_of_page -->
-        <button id="toggle-ad-banner">Hide Ad</button>
-    </div>
     <!-- Scripts will be moved to the end of body for better performance and DOM access -->
     <header id="app-header">
         <div class="header-title">
@@ -129,6 +123,27 @@
             <input type="hidden" id="selected-task-color-value" name="selected-task-color-value">
             <!-- Original input type="color" removed -->
 
+            <label>Traffic Light Status:</label>
+            <div id="task-traffic-light-container" class="traffic-light-panel-container">
+                <div class="traffic-light-panel-option" data-status="red">
+                    <div class="traffic-light-panel-indicator red"></div>
+                    <span>Red</span>
+                </div>
+                <div class="traffic-light-panel-option" data-status="amber">
+                    <div class="traffic-light-panel-indicator amber"></div>
+                    <span>Amber</span>
+                </div>
+                <div class="traffic-light-panel-option" data-status="green">
+                    <div class="traffic-light-panel-indicator green"></div>
+                    <span>Green</span>
+                </div>
+                <div class="traffic-light-panel-option" data-status="none">
+                    <div class="traffic-light-panel-indicator none">None</div>
+                    <span>None</span>
+                </div>
+            </div>
+            <input type="hidden" id="selected-traffic-light-status" name="selected-traffic-light-status">
+
             <label for="task-dependent-team-select">Dependent Team:</label>
             <select id="task-dependent-team-select" name="task-dependent-team">
                 <option value="">None</option>
@@ -166,13 +181,5 @@
     <script src="js/ui/addSprintModal.js"></script> <!-- New: Add Sprint Modal -->
     <script src="js/main.js"></script>
 
-    <!-- Ezoic and Gatekeeper Consent scripts moved to end of body for asynchronous loading -->
-    <script defer src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false"></script>
-    <script defer src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false"></script>
-    <script async src="https://www.ezojs.com/ezoic/sa.min.js"></script>
-    <script>
-        window.ezstandalone = window.ezstandalone || {};
-        ezstandalone.cmd = ezstandalone.cmd || [];
-    </script>
 </body>
 </html>

@@ -35,9 +35,10 @@ class Task {
      * @param {string} [sprintId] - ID of the sprint this task is assigned to (null or 'Backlog' if unassigned).
      * @param {string} [color] - Color indicator for the task.
      * @param {string} [dependentTeam] - Name of the team this task has a dependency on.
+     * @param {string|null} [trafficLightStatus] - Traffic light status: null, 'red', 'amber', or 'green'.
      * @param {string} [id] - Optional ID, will be generated if not provided.
      */
-    constructor(name, storyPoints, epicId, sprintId = null, color = '#D3D3D3', dependentTeam = null, id = generateUniqueId()) {
+    constructor(name, storyPoints, epicId, sprintId = null, color = '#D3D3D3', dependentTeam = null, trafficLightStatus = null, id = generateUniqueId()) {
         this.id = id;
         this.name = name;
         this.storyPoints = storyPoints;
@@ -45,6 +46,7 @@ class Task {
         this.sprintId = sprintId; // Can be null or a special "Backlog" identifier
         this.color = color;
         this.dependentTeam = dependentTeam; // e.g., "Frontend Team", "Backend Team", null
+        this.trafficLightStatus = trafficLightStatus; // Traffic light status: null, 'red', 'amber', 'green'
     }
 }
 

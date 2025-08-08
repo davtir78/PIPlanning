@@ -28,6 +28,9 @@
             const storyPoints = parseFloat(row['Custom field (Story Points)'] || row['Story Points']) || 0;
             const epicLink = row['Epic Link'] || row['Parent key']; // Prioritize 'Epic Link', fallback to 'Parent key'
             const sprintName = row['Sprint'];
+            const sprintAssignment = row['SprintAssignment']; // Support old format with SprintAssignment column
+            // Prefer SprintAssignment (old format) if present, otherwise use Sprint (newer format)
+            const sprintField = (typeof sprintAssignment !== 'undefined' && sprintAssignment !== null && String(sprintAssignment).trim() !== '') ? String(sprintAssignment).trim() : (sprintName ? String(sprintName).trim() : null);
             const status = row['Status'];
             const assignee = row['Assignee'];
             const reporter = row['Reporter'];
@@ -49,6 +52,7 @@
                 }
             } else if (issueType === 'Story' || issueType === 'Task' || issueType === 'Bug') {
                 const issueColor = row['Custom field (Issue color)'] || row['Issue color'] || ''; // Flexible mapping for issue color
+                const trafficLightStatus = row['Custom field (Traffic Light Status)'] || row['Traffic Light Status'] || null; // Map traffic light status
                 const task = {
                     id: issueKey,
                     name: summary,
@@ -63,8 +67,10 @@
                     dueDate: dueDate,
                     labels: labels,
                     epicId: epicLink || null, // Link to epic if available
-                    sprintName: sprintName || null, // Link to sprint if available
-                    color: issueColor // Map issue color to task color
+                    sprintName: sprintName || null, // Link to sprint if available (from 'Sprint' column)
+                    sprintRef: sprintField || null, // Unified sprint reference (could be SprintAssignment or Sprint)
+                    color: issueColor, // Map issue color to task color
+                    trafficLightStatus: trafficLightStatus // Map traffic light status
                 };
                 tasks.push(task);
 
@@ -73,42 +79,60 @@
                 }
             }
 
-            // Handle Sprints: If a sprint name is present, try to find an existing sprint by name.
+            // Handle Sprints: If a sprint reference is present (SprintAssignment or Sprint),
+            // try to find an existing sprint by that reference (name or id).
             // If not found, a new sprint object is created for internal use during import,
             // but it's not saved to Storage here. Sprints are saved as a whole later.
-            if (sprintName) {
-                let sprint = sprints[sprintName];
+            if (sprintField) {
+                // Use the sprintField value as the key in the temporary sprints map.
+                // This preserves whatever the incoming file contained (name or id).
+                let sprint = sprints[sprintField];
                 if (!sprint) {
                     sprint = {
-                        id: sprintName, // Using sprint name as ID for now, will be replaced by actual ID if saved
-                        name: sprintName,
+                        id: sprintField, // Using the provided reference as ID for temporary import purposes
+                        name: sprintField,
                         startDate: null,
                         endDate: null,
                         status: 'Planned',
                         tasks: []
                     };
-                    sprints[sprintName] = sprint;
+                    sprints[sprintField] = sprint;
                 }
                 sprint.tasks.push(issueKey); // Associate task with this sprint object
             }
         });
 
-        // After parsing all rows, ensure tasks have correct sprintId if a sprint object was found/created
+        // After parsing all rows, ensure tasks have correct sprintId if a sprint reference was provided
         tasks.forEach(task => {
-            if (task.sprintName) { // task.sprintName holds the JIRA sprint name
-                const foundSprint = Storage.getSprintByName(task.sprintName);
-                if (foundSprint) {
-                    task.sprintId = foundSprint.id;
-                } else {
-                    // If sprint not found in Storage, but was in JIRA data,
-                    // we might want to create it or just leave sprintId as null.
-                    // For now, if not found, it remains unassigned (sprintId: null).
-                    // The _parseJIRAData function already creates a temporary sprint object
-                    // in the 'sprints' map, but that's not saved to Storage yet.
-                    // The user's current setup doesn't automatically create sprints on import.
-                    // So, if it's not in Storage, it's effectively a backlog item.
-                    task.sprintId = null; // Explicitly set to null if no matching sprint in Storage
+            // sprintRef may come from either the SprintAssignment column (old files) or Sprint column
+            const sprintRef = task.sprintRef || task.sprintName || null;
+
+            if (sprintRef) {
+                // Explicit 'Backlog' reference should map to the special Backlog identifier
+                if (String(sprintRef).toLowerCase() === 'backlog') {
+                    task.sprintId = 'Backlog';
+                    return;
                 }
+
+                // Try to resolve by Sprint ID first (if storage provides a matching ID)
+                const sprintById = Storage.getSprintById(sprintRef);
+                if (sprintById) {
+                    task.sprintId = sprintById.id;
+                    return;
+                }
+
+                // Fallback: try to resolve by Sprint Name
+                const sprintByName = Storage.getSprintByName(sprintRef);
+                if (sprintByName) {
+                    task.sprintId = sprintByName.id;
+                    return;
+                }
+
+                // If no matching sprint found, leave unassigned (null)
+                task.sprintId = null;
+            } else {
+                // No sprint reference provided; leave as null
+                task.sprintId = null;
             }
         });
 
@@ -303,7 +327,8 @@
                 'Epic Link': task.epicId || '', // Link to epic if available
                 'Sprint': sprintName, // Use the resolved sprint name
                 'Custom field (Issue color)': task.color || '', // Export custom issue color
-                'Custom field (Dependent Team)': task.dependentTeam || '' // Export dependent team
+                'Custom field (Dependent Team)': task.dependentTeam || '', // Export dependent team
+                'Custom field (Traffic Light Status)': task.trafficLightStatus || '' // Export traffic light status
                 // Other JIRA fields (Status, Assignee, Reporter, Created, Updated, Due Date, Labels)
                 // are intentionally omitted based on previous feedback/requirements.
             };
@@ -455,6 +480,7 @@
                                 epicName: t.Epic, // Store epic name temporarily for lookup
                                 sprintName: t.SprintAssignment, // Store sprint name temporarily for lookup
                                 storyPoints: t.StoryPoints,
+                                trafficLightStatus: t['Traffic Light Status'] || null, // Add traffic light status
                                 issueType: t['Issue Type'] || 'Story',
                                 assignee: t.Assignee || '',
                                 reporter: t.Reporter || '',
@@ -478,11 +504,28 @@
                 // Now, process tasks to link epics and sprints by ID
                 const finalTasks = tempTasks.map(task => {
                     const epic = tempEpics.find(e => e.name === task.epicName);
-                    const sprint = tempSprints.find(s => s.name === task.sprintName);
+                    // Resolve sprintAssignment which may be a sprint ID, sprint name, or 'Backlog'
+                    let resolvedSprintId = null;
+                    if (task.sprintName) {
+                        if (String(task.sprintName).toLowerCase() === 'backlog') {
+                            resolvedSprintId = 'Backlog';
+                        } else {
+                            // Attempt by ID first
+                            const byId = tempSprints.find(s => String(s.id) === String(task.sprintName));
+                            if (byId) {
+                                resolvedSprintId = byId.id;
+                            } else {
+                                // Fallback to matching by name
+                                const byName = tempSprints.find(s => s.name === task.sprintName);
+                                if (byName) resolvedSprintId = byName.id;
+                            }
+                        }
+                    }
+
                     return {
                         ...task,
                         epicId: epic ? epic.id : null,
-                        sprintId: sprint ? sprint.id : null,
+                        sprintId: resolvedSprintId,
                         epicName: undefined, // Remove temporary property
                         sprintName: undefined // Remove temporary property
                     };

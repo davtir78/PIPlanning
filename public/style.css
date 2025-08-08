@@ -221,7 +221,7 @@ body {
 
 /* Panel Header */
 .panel-header {
-    padding: 20px; /* Increased padding to match modal */
+    padding: 12px 15px; /* Reduced padding for compactness */
     border-bottom: 1px solid var(--border-color, #DDDDDD);
     display: flex;
     justify-content: space-between;
@@ -230,14 +230,14 @@ body {
 
 .panel-header h3 {
     margin: 0;
-    font-size: 1.3rem; /* Slightly larger font size */
+    font-size: 1.1rem; /* Smaller font size */
     font-weight: 600; /* Bolder font weight */
 }
 
 .panel-header .close-btn {
     background: none;
     border: none;
-    font-size: 1.8rem; /* Larger close button */
+    font-size: 1.5rem; /* Smaller close button */
     cursor: pointer;
     color: #888;
     padding: 0; /* Remove default button padding */
@@ -249,76 +249,78 @@ body {
 
 /* Panel Content Area */
 .panel-content {
-    padding: 20px; /* Padding similar to modal content */
+    padding: 15px; /* Reduced padding for compactness */
     flex-grow: 1; /* Allow content to take available space */
     overflow-y: auto; /* Add scrolling if content overflows vertically */
 }
 
 /* Panel Footer */
 .panel-footer {
-    padding: 20px; /* Increased padding to match modal */
+    padding: 12px 15px; /* Reduced padding for compactness */
     border-top: 1px solid var(--border-color, #DDDDDD);
     display: flex;
     justify-content: flex-end;
-    gap: 10px; /* Space between buttons */
+    gap: 8px; /* Reduced gap between buttons */
     margin-top: auto; /* Push footer to the bottom */
 }
 
 .panel-footer button {
     flex: 1 1 0%; /* Make buttons take equal width, overriding default .btn width */
+    padding: 8px 12px; /* Smaller button padding */
+    font-size: 0.9rem; /* Smaller font size for buttons */
 }
 
 /* Consistent styling for form elements within panels */
 .panel-content label {
     display: block;
-    margin-bottom: 8px; /* Increased margin below label */
+    margin-bottom: 4px; /* Reduced margin below label */
     font-weight: bold;
-    font-size: 0.95rem; /* Slightly larger font size */
+    font-size: 0.85rem; /* Smaller font size */
     color: var(--text-color, #333333); /* Use text color variable */
 }
 
 .panel-content input[type="text"],
 .panel-content input[type="number"],
 .panel-content select {
-    width: calc(100% - 20px); /* Adjust width for 10px padding on each side */
-    padding: 10px; /* Increased padding */
+    width: 100%; /* Full width with border-box */
+    padding: 6px 8px; /* Reduced padding */
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 1rem; /* Increased font size */
-    margin-bottom: 20px; /* Increased margin for spacing */
+    font-size: 0.9rem; /* Smaller font size */
+    margin-bottom: 12px; /* Reduced margin for spacing */
     box-sizing: border-box;
 }
 
 .panel-content div { /* Add some margin below each form field group */
-     margin-bottom: 15px; /* Increased margin */
+     margin-bottom: 10px; /* Reduced margin */
 }
 
 /* Color Palette Styling */
 .color-palette-container {
     display: flex;
     flex-direction: column; /* Stack groups vertically */
-    gap: 2px; /* Space between color groups - reduced for closer rows */
-    margin-bottom: 20px; /* Increased space below the palette */
+    gap: 1px; /* Reduced space between color groups */
+    margin-bottom: 12px; /* Reduced space below the palette */
 }
 
 .color-palette-container h4 {
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-size: 0.9em;
+    margin-top: 6px;
+    margin-bottom: 3px;
+    font-size: 0.8em;
     color: var(--text-color-medium);
 }
 
 .color-swatch-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px; /* Space between swatches within a group */
+    gap: 4px; /* Reduced space between swatches within a group */
     justify-content: space-between; /* Distribute swatches evenly across the width */
 }
 
 .color-swatch {
-    width: 28px; /* Swatch size */
-    height: 28px; /* Swatch size */
-    border-radius: 4px;
+    width: 20px; /* Smaller swatch size */
+    height: 20px; /* Smaller swatch size */
+    border-radius: 3px;
     cursor: pointer;
     border: 1px solid #ccc; /* Add a subtle border */
     box-sizing: border-box; /* Include border in size */
@@ -369,22 +371,60 @@ body {
 }
 
 .sprint-board-filter-container {
-    padding: 10px 15px;
-    background-color: var(--column-background);
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    background-color: #eef3f7;
+    border: 1px solid #d9e2ea;
     border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    max-width: 280px; /* Constrain to backlog column width */
+    width: 100%;
+}
+
+/* Input row - keep input and search button on same line */
+.filter-input-row {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    align-items: center;
 }
 
 .sprint-board-filter-input {
-    width: 100%;
-    padding: 10px 15px;
+    flex: 1 1 auto;
+    padding: 8px 12px;
     border: 1px solid var(--border-color-medium);
-    border-radius: 5px;
+    border-radius: 6px;
     font-size: 1rem;
     color: var(--text-color-dark);
     background-color: var(--card-background);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-width: 0; /* Allow input to shrink */
+}
+
+.filter-apply-btn {
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color-medium);
+    border-radius: 6px;
+    background-color: var(--card-background);
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-color-dark);
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    width: 32px; /* Fixed width for search icon */
+    height: 36px; /* Match input height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-apply-btn:hover {
+    background-color: var(--light-purple);
 }
 
 .sprint-board-filter-input::placeholder {
@@ -696,6 +736,243 @@ body {
     color: var(--text-color-light); /* Muted color for dependency */
     margin-top: 5px; /* Add some space above it */
     font-size: 0.7rem; /* Decreased font for dependency */
+}
+
+/* Traffic Light Component Styles - Redesigned as right stripe */
+.traffic-light-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px; /* Width of the black stripe */
+    background-color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    z-index: 2;
+    cursor: pointer;
+    border-top-right-radius: 6px; /* Match card border radius */
+    border-bottom-right-radius: 6px;
+}
+
+.traffic-light {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Light border for contrast on dark background */
+    transition: all 0.2s ease;
+    background-color: #666; /* Darker grey for "off" state on dark background */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.traffic-light:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Base colors for traffic lights */
+.traffic-light.red {
+    background-color: #dc3545;
+    border-color: #fff;
+    box-shadow: 0 0 6px rgba(220, 53, 69, 0.6);
+}
+
+.traffic-light.amber {
+    background-color: #ffc107;
+    border-color: #fff;
+    box-shadow: 0 0 6px rgba(255, 193, 7, 0.6);
+}
+
+.traffic-light.green {
+    background-color: #28a745;
+    border-color: #fff;
+    box-shadow: 0 0 6px rgba(40, 167, 69, 0.6);
+}
+
+/* Position task card to accommodate the traffic light stripe */
+.task-card {
+    position: relative;
+    overflow: hidden;
+    padding-right: 26px; /* Add padding to prevent text from overlapping the stripe */
+}
+
+/* Traffic Light Panel Styles */
+.traffic-light-panel-container {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 6px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.traffic-light-panel-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    flex: 1;
+}
+
+.traffic-light-panel-option:hover {
+    background-color: #e9ecef;
+}
+
+.traffic-light-panel-option.active {
+    border-color: var(--primary-purple);
+    background-color: var(--light-purple);
+}
+
+.traffic-light-panel-indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: bold;
+    color: #666;
+}
+
+.traffic-light-panel-indicator.red {
+    background-color: #dc3545;
+    border-color: #c82333;
+}
+
+.traffic-light-panel-indicator.amber {
+    background-color: #ffc107;
+    border-color: #e0a800;
+}
+
+.traffic-light-panel-indicator.green {
+    background-color: #28a745;
+    border-color: #1e7e34;
+}
+
+.traffic-light-panel-indicator.none {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+}
+
+.traffic-light-panel-option span {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-color-medium);
+}
+
+.traffic-light-panel-option.active span {
+    color: var(--primary-purple);
+    font-weight: 600;
+}
+
+/* Traffic Light Filter Buttons */
+.traffic-light-filter-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 0;
+    margin-top: 8px;
+    border-top: 1px solid #d9e2ea;
+    padding-top: 8px;
+    flex-wrap: wrap;
+}
+
+.traffic-light-filter-btn {
+    padding: 2px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 25px;
+    text-align: center;
+}
+
+.traffic-light-filter-btn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.traffic-light-filter-btn.active {
+    background-color: var(--primary-purple);
+    color: white;
+    border-color: var(--primary-purple);
+}
+
+.traffic-light-filter-red {
+    color: #dc3545;
+    font-size: 16px;
+}
+
+.traffic-light-filter-red.active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+.traffic-light-filter-amber {
+    color: #ffc107;
+    font-size: 16px;
+}
+
+.traffic-light-filter-amber.active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: white;
+}
+
+.traffic-light-filter-green {
+    color: #28a745;
+    font-size: 16px;
+}
+
+.traffic-light-filter-green.active {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.traffic-light-filter-none {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.traffic-light-filter-none.active {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.toggle-traffic-lights-btn {
+    padding: 2px 8px;
+    border: 1px solid var(--accent-green);
+    border-radius: 5px;
+    background-color: var(--accent-green);
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+
+.toggle-traffic-lights-btn:hover {
+    background-color: var(--dark-green);
+    border-color: var(--dark-green);
 }
 
 /* Styling for SortableJS placeholders */

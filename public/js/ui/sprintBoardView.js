@@ -3,6 +3,7 @@
 const SprintBoardView = (() => {
     let sprintBoardViewElement = null;
     let currentFilterString = ''; // Stores the current filter string
+    let currentTrafficLightFilter = 'all'; // Stores the current traffic light filter
     let filterTimeout = null;    // For debouncing the filter input
 
     /**
@@ -169,6 +170,10 @@ const SprintBoardView = (() => {
             card.classList.add('dark-background');
         }
 
+        // Add traffic light component
+        const trafficLightContainer = _createTrafficLightComponent(task);
+        card.appendChild(trafficLightContainer);
+
         const nameElement = createElement('h4', 'task-name', null, task.name); // Corrected
         card.appendChild(nameElement);
 
@@ -180,16 +185,104 @@ const SprintBoardView = (() => {
 
         // Dependent team display is removed as per request
 
-        card.addEventListener('click', () => {
-            const taskData = Storage.getTaskById(task.id); // Use Storage object
-            if (taskData) {
-                TaskPropertyPanel.openPanel(task.id);
-            } else {
-                console.error(`Task data for ID ${task.id} not found.`);
+        card.addEventListener('click', (event) => {
+            // Don't open task panel if clicking on traffic light
+            if (!event.target.closest('.traffic-light-container')) {
+                const taskData = Storage.getTaskById(task.id); // Use Storage object
+                if (taskData) {
+                    TaskPropertyPanel.openPanel(task.id);
+                } else {
+                    console.error(`Task data for ID ${task.id} not found.`);
+                }
             }
         });
 
         return card;
+    }
+
+    /**
+     * Creates the traffic light component for a task card.
+     * @param {Task} task - The task object.
+     * @returns {HTMLElement} The traffic light container element.
+     * @private
+     */
+    function _createTrafficLightComponent(task) {
+        const container = createElement('div', 'traffic-light-container');
+        
+        const redLight = createElement('div', 'traffic-light', { 'data-color': 'red' });
+        const amberLight = createElement('div', 'traffic-light', { 'data-color': 'amber' });
+        const greenLight = createElement('div', 'traffic-light', { 'data-color': 'green' });
+
+        // Set active state and apply color class based on current traffic light status
+        if (task.trafficLightStatus === 'red') {
+            redLight.classList.add('red', 'active');
+        } else {
+            redLight.classList.add('off');
+        }
+        
+        if (task.trafficLightStatus === 'amber') {
+            amberLight.classList.add('amber', 'active');
+        } else {
+            amberLight.classList.add('off');
+        }
+        
+        if (task.trafficLightStatus === 'green') {
+            greenLight.classList.add('green', 'active');
+        } else {
+            greenLight.classList.add('off');
+        }
+
+        // Add click event listeners for traffic light interaction
+        redLight.addEventListener('click', (event) => {
+            event.stopPropagation();
+            _handleTrafficLightClick(task.id, 'red');
+        });
+
+        amberLight.addEventListener('click', (event) => {
+            event.stopPropagation();
+            _handleTrafficLightClick(task.id, 'amber');
+        });
+
+        greenLight.addEventListener('click', (event) => {
+            event.stopPropagation();
+            _handleTrafficLightClick(task.id, 'green');
+        });
+
+        container.appendChild(redLight);
+        container.appendChild(amberLight);
+        container.appendChild(greenLight);
+
+        return container;
+    }
+
+    /**
+     * Handles traffic light click events and updates the task status.
+     * @param {string} taskId - The ID of the task.
+     * @param {string} color - The color that was clicked ('red', 'amber', 'green').
+     * @private
+     */
+    function _handleTrafficLightClick(taskId, color) {
+        const allTasks = Storage.getTasks();
+        const task = allTasks.find(t => t.id === taskId);
+        
+        if (!task) {
+            console.error(`Task with ID ${taskId} not found.`);
+            return;
+        }
+
+        // Toggle logic: if the clicked color is already active, turn it off (set to null)
+        // Otherwise, set the clicked color as active
+        if (task.trafficLightStatus === color) {
+            task.trafficLightStatus = null;
+        } else {
+            task.trafficLightStatus = color;
+        }
+
+        // Save the updated tasks
+        Storage.saveTasks(allTasks);
+
+        // Re-render the sprint board to reflect the changes
+        _renderInternal();
     }
 
     /**
@@ -220,23 +313,127 @@ const SprintBoardView = (() => {
 
         // Add filter input field inside backlogHeader
         const filterContainer = createElement('div', 'sprint-board-filter-container');
+        
+        // Create input row container
+        const filterInputRow = createElement('div', 'filter-input-row');
+        
         const filterInput = createElement('input', 'sprint-board-filter-input', {
             type: 'text',
             id: 'sprint-board-filter-input',
             placeholder: 'Filter tasks by description, epic, or team...'
         });
         filterInput.value = currentFilterString; // Set initial value from state
-        filterContainer.appendChild(filterInput);
-        backlogHeader.appendChild(filterContainer); // Add filter inside backlogHeader
-
-        // Event listener for filter input (debounced)
-        filterInput.addEventListener('input', (event) => {
-            clearTimeout(filterTimeout);
-            filterTimeout = setTimeout(() => {
-                currentFilterString = event.target.value.toLowerCase();
-                _renderInternal(); // Re-render the board with the new filter
-            }, 500); // Debounce for 500ms
+        
+        // Create traffic light filter buttons
+        const trafficLightFilterContainer = createElement('div', 'traffic-light-filter-container');
+        
+        const allFilterBtn = createElement('button', 'traffic-light-filter-btn', { 'data-filter': 'all' });
+        allFilterBtn.textContent = 'All';
+        allFilterBtn.title = 'Show all tasks';
+        
+        const redFilterBtn = createElement('button', 'traffic-light-filter-btn traffic-light-filter-red', { 'data-filter': 'red' });
+        redFilterBtn.innerHTML = '●';
+        redFilterBtn.title = 'Show only red status tasks';
+        
+        const amberFilterBtn = createElement('button', 'traffic-light-filter-btn traffic-light-filter-amber', { 'data-filter': 'amber' });
+        amberFilterBtn.innerHTML = '●';
+        amberFilterBtn.title = 'Show only amber status tasks';
+        
+        const greenFilterBtn = createElement('button', 'traffic-light-filter-btn traffic-light-filter-green', { 'data-filter': 'green' });
+        greenFilterBtn.innerHTML = '●';
+        greenFilterBtn.title = 'Show only green status tasks';
+        
+        const noStatusFilterBtn = createElement('button', 'traffic-light-filter-btn traffic-light-filter-none', { 'data-filter': 'none' });
+        noStatusFilterBtn.innerHTML = '○';
+        noStatusFilterBtn.title = 'Show only tasks with no traffic light status';
+        
+        // Add a toggle button for traffic light visibility
+        const toggleTrafficLightsBtn = createElement('button', 'toggle-traffic-lights-btn');
+        toggleTrafficLightsBtn.textContent = 'Hide'; // Start with 'Hide' since lights are visible by default
+        toggleTrafficLightsBtn.title = 'Toggle traffic light visibility';
+        
+        // Add click event listener for the toggle button
+        toggleTrafficLightsBtn.addEventListener('click', () => {
+            const taskCards = document.querySelectorAll('.task-card');
+            let areHidden = true; // Will be updated based on actual state
+            
+            taskCards.forEach(card => {
+                const trafficLightContainer = card.querySelector('.traffic-light-container');
+                if (trafficLightContainer) {
+                    trafficLightContainer.classList.toggle('hidden');
+                }
+            });
+            
+            // Check the state after toggling to determine button text
+            const firstCard = document.querySelector('.task-card');
+            if (firstCard) {
+                const firstTrafficLight = firstCard.querySelector('.traffic-light-container');
+                if (firstTrafficLight) {
+                    areHidden = firstTrafficLight.classList.contains('hidden');
+                }
+            }
+            
+            // Update button text based on current state
+            toggleTrafficLightsBtn.textContent = areHidden ? 'Show' : 'Hide';
         });
+        
+        // Add click event listeners for traffic light filters
+        [allFilterBtn, redFilterBtn, amberFilterBtn, greenFilterBtn, noStatusFilterBtn].forEach(btn => {
+            btn.addEventListener('click', (event) => {
+                // Remove active class from all filter buttons
+                trafficLightFilterContainer.querySelectorAll('.traffic-light-filter-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                event.target.classList.add('active');
+                // Set the traffic light filter
+                currentTrafficLightFilter = event.target.dataset.filter;
+                _renderInternal(); // Re-render with new filter
+            });
+        });
+        
+        // Set initial active state
+        if (currentTrafficLightFilter === 'all') {
+            allFilterBtn.classList.add('active');
+        } else if (currentTrafficLightFilter === 'red') {
+            redFilterBtn.classList.add('active');
+        } else if (currentTrafficLightFilter === 'amber') {
+            amberFilterBtn.classList.add('active');
+        } else if (currentTrafficLightFilter === 'green') {
+            greenFilterBtn.classList.add('active');
+        } else if (currentTrafficLightFilter === 'none') {
+            noStatusFilterBtn.classList.add('active');
+        }
+        
+        // Create filter button
+        const filterButton = createElement('button', 'filter-apply-btn', null, '🔍');
+        filterButton.title = 'Apply filter';
+        filterButton.addEventListener('click', () => {
+            currentFilterString = filterInput.value.toLowerCase();
+            _renderInternal(); // Re-render the board with the new filter
+        });
+
+        // Event listener for filter input (Enter key)
+        filterInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                currentFilterString = filterInput.value.toLowerCase();
+                _renderInternal(); // Re-render the board with the new filter
+            }
+        });
+
+        trafficLightFilterContainer.appendChild(toggleTrafficLightsBtn);
+        trafficLightFilterContainer.appendChild(allFilterBtn);
+        trafficLightFilterContainer.appendChild(redFilterBtn);
+        trafficLightFilterContainer.appendChild(amberFilterBtn);
+        trafficLightFilterContainer.appendChild(greenFilterBtn);
+        trafficLightFilterContainer.appendChild(noStatusFilterBtn);
+        
+        // Add input and button to the input row
+        filterInputRow.appendChild(filterInput);
+        filterInputRow.appendChild(filterButton);
+        
+        // Add both rows to the filter container
+        filterContainer.appendChild(filterInputRow);
+        filterContainer.appendChild(trafficLightFilterContainer);
+        backlogHeader.appendChild(filterContainer); // Add filter inside backlogHeader
 
         const addBacklogTaskButton = createElement('button', 'add-task-backlog-btn', null, '+ Add Task to Backlog'); // Corrected
         addBacklogTaskButton.addEventListener('click', () => {
@@ -271,18 +468,34 @@ const SprintBoardView = (() => {
             columnsContainer.appendChild(createElement('p', null, null, 'No sprints available. Please add sprints or perform setup.')); // Corrected
         }
 
-        // Filter tasks based on currentFilterString
+        // Filter tasks based on currentFilterString and traffic light filter
         const filteredTasks = allTasks.filter(task => {
-            if (!currentFilterString) return true; // No filter applied
+            // Apply text filter
+            let textFilterPassed = true;
+            if (currentFilterString) {
+                const taskName = task.name ? task.name.toLowerCase() : '';
+                const epic = epics.find(e => e.id === task.epicId);
+                const epicName = epic ? epic.name.toLowerCase() : '';
+                const dependentTeam = task.dependentTeam ? task.dependentTeam.toLowerCase() : '';
 
-            const taskName = task.name ? task.name.toLowerCase() : '';
-            const epic = epics.find(e => e.id === task.epicId);
-            const epicName = epic ? epic.name.toLowerCase() : '';
-            const dependentTeam = task.dependentTeam ? task.dependentTeam.toLowerCase() : '';
+                textFilterPassed = taskName.includes(currentFilterString) ||
+                                 epicName.includes(currentFilterString) ||
+                                 dependentTeam.includes(currentFilterString);
+            }
 
-            return taskName.includes(currentFilterString) ||
-                   epicName.includes(currentFilterString) ||
-                   dependentTeam.includes(currentFilterString);
+            // Apply traffic light filter
+            let trafficLightFilterPassed = true;
+            if (currentTrafficLightFilter !== 'all') {
+                if (currentTrafficLightFilter === 'none') {
+                    // Show tasks that have no traffic light status (i.e., not red, amber, or green)
+                    const status = task.trafficLightStatus;
+                    trafficLightFilterPassed = !(status && (status === 'red' || status === 'amber' || status === 'green'));
+                } else {
+                    trafficLightFilterPassed = task.trafficLightStatus === currentTrafficLightFilter;
+                }
+            }
+
+            return textFilterPassed && trafficLightFilterPassed;
         });
 
         // Populate tasks into their respective columns (including backlog) and calculate initial story points
