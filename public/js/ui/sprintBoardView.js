@@ -208,6 +208,7 @@ const SprintBoardView = (() => {
      */
     function _createTrafficLightComponent(task) {
         const container = createElement('div', 'traffic-light-container');
+        container.classList.add('hidden'); // Hidden by default
         
         const redLight = createElement('div', 'traffic-light', { 'data-color': 'red' });
         const amberLight = createElement('div', 'traffic-light', { 'data-color': 'amber' });
@@ -349,7 +350,7 @@ const SprintBoardView = (() => {
         
         // Add a toggle button for traffic light visibility
         const toggleTrafficLightsBtn = createElement('button', 'toggle-traffic-lights-btn');
-        toggleTrafficLightsBtn.textContent = 'Hide'; // Start with 'Hide' since lights are visible by default
+        toggleTrafficLightsBtn.textContent = 'Show'; // Start with 'Show' since lights are hidden by default
         toggleTrafficLightsBtn.title = 'Toggle traffic light visibility';
         
         // Add click event listener for the toggle button
