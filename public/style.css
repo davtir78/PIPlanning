@@ -1193,6 +1193,49 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* --- Settings Page Specific Styles --- */
+
+/* PDF Preview Styles */
+.preview-pages {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.preview-page {
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    position: relative;
+    margin: 10px 0;
+}
+
+.preview-page.landscape {
+    width: 842px;
+    height: 595px;
+}
+
+.preview-page.portrait {
+    width: 595px;
+    height: 842px;
+}
+
+.preview-orientation {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.8);
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #666;
+}
+
+@media (max-width: 900px) {
+    .preview-page {
+        transform: scale(0.6);
+        transform-origin: top left;
+    }
+}
 .settings-page-container {
     max-width: 900px;
     margin: 0 auto; /* Center horizontally */
@@ -1413,92 +1456,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .import-export-group legend {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: var(--dark-purple);
-    padding: 0 10px;
-    background-color: var(--light-purple); /* Match fieldset background */
-    border-radius: 4px;
-}
-
-
-/* --- Danger Zone --- */
-.danger-zone-content {
-    /* border: 2px solid #DC3545; padding: 20px; border-radius: 5px; background-color: #F8D7DA; */
-}
-
-.warning-box {
-    border: 1px solid #F5C6CB;
-    background-color: #F8D7DA;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-.warning-box h3 {
-    color: #721C24;
-    margin-top:0;
-}
-
-.warning-box p strong {
-    color: #721C24;
-}
-
-.btn-danger-solid {
-    background-color: #DC3545;
-    color: white;
-    border-color: #DC3545;
-    width: 100%;
-    font-weight: bold;
-}
-
-.btn-danger-solid:hover {
-    background-color: #C82333;
-    border-color: #BD2130;
-}
-
-/* Collapsible Ad Banner Styles */
-#collapsible-ad-banner {
-    background-color: #f0f0f0; /* Light background for the banner */
-    padding: 10px;
-    text-align: center;
-    border-bottom: 1px solid #ccc;
-    overflow: hidden; /* Hide overflow when collapsed */
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out; /* Smooth transition */
-    max-height: 200px; /* Max height when expanded (adjust as needed for ad size) */
-}
-
-#collapsible-ad-banner.collapsed {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
-#collapsible-ad-banner #toggle-ad-banner {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-#collapsible-ad-banner #toggle-ad-banner:hover {
-    background-color: #0056b3;
-}
-
-/* Responsive adjustments for Welcome Modal */
-@media (max-width: 768px) {
-    .modal-container {
-        max-width: 90%; /* Allow modal to take up more width on smaller screens */
-        padding: 20px 25px; /* Reduce padding for smaller screens */
-    }
-
-    .modal-container h1 {
-        font-size: 24px; /* Smaller font size for mobile */
-    }
-
-    .modal-container .subtitle {
-        font-size: 14px; /* Smaller font size for mobile */
-    }
+    font-size: 1.1rem;
+    color: #333;
 }

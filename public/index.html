@@ -14,6 +14,10 @@
     <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" type="text/javascript"></script>
     <!-- SheetJS (xlsx.full.min.js) via CDN for XLSX import/export -->
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 </head>
 <body>
     <!-- Scripts will be moved to the end of body for better performance and DOM access -->
@@ -24,6 +28,7 @@
         <nav class="header-nav">
             <button id="sprint-board-btn" class="view-toggle-btn active" data-view="sprint-board-view">Sprint Board</button>
             <button id="gantt-view-btn" class="view-toggle-btn" data-view="gantt-view">Roadmap</button>
+            <button id="reporting-btn" class="view-toggle-btn" data-view="reporting-view">Reporting</button>
             <button id="settings-btn" class="view-toggle-btn" data-view="settings-view">Settings</button>
         </nav>
         <div id="header-controls" class="header-controls">
@@ -61,6 +66,10 @@
                 </select>
             </div>
             <div id="gantt_chart_container" style="width: 100%; height: calc(100% - 80px);"></div>
+        </div>
+
+        <div id="reporting-view" class="view" style="display: none;">
+            <!-- Reporting content: dropdown, preview, save button will be dynamically added here -->
         </div>
     </main>
 
@@ -179,6 +188,7 @@
     <script src="js/ui/settingsView.js"></script>
     <script src="js/ui/roadmapView.js"></script>
     <script src="js/ui/addSprintModal.js"></script> <!-- New: Add Sprint Modal -->
+    <script src="js/ui/reportingView.js"></script> <!-- New: Reporting View -->
     <script src="js/main.js"></script>
 
 </body>

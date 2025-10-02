@@ -24,6 +24,7 @@ function _initializeModules() {
     TaskPropertyPanel.init();
     FeatureTemplateModal.init(); // Initialize the new modal
     SettingsView.init(); // Initialize the new settings view
+    ReportingView.init(); // Initialize the new reporting view
     AddSprintModal.init(); // Initialize the new Add Sprint Modal
     // PIObjectivesView.init(); // When available
 

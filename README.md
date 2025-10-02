@@ -12,7 +12,9 @@ PI Planner is a single-page HTML web application designed for Program Increment 
 *   **First-Time User Setup**: Guided setup for new users to quickly populate initial PI data.
 
 ## How to Use
+Navigate to https://piplannerbasic.web.app/
 
+Alternatively, for local hosting:
 1.  **Clone the repository**:
     `git clone https://github.com/davtir78/PIPlanning.git`
 2.  **Navigate to the project directory**:
