@@ -4,6 +4,7 @@ const Header = (() => {
     // DOM Elements for header controls
     let sprintBoardBtn = null;
     let ganttViewBtn = null;
+    let reportingBtn = null;
     let settingsBtn = null;
     let headerControlsEl = null; // Reference to the header-controls div
     let viewToggleButtons = null;
@@ -17,6 +18,7 @@ const Header = (() => {
         // Hide all views first, then show the target one
         if (typeof SprintBoardView !== 'undefined') SprintBoardView.hide();
         if (typeof GanttView !== 'undefined') GanttView.hide();
+        if (typeof ReportingView !== 'undefined') ReportingView.hide();
         const piObjectivesViewEl = document.getElementById('pi-objectives-view');
         if (piObjectivesViewEl) piObjectivesViewEl.style.display = 'none';
         const settingsViewEl = document.getElementById('settings-view');
@@ -32,6 +34,14 @@ const Header = (() => {
                 const ganttViewEl = document.getElementById('gantt-view');
                 if (ganttViewEl) ganttViewEl.style.display = 'block';
                 console.error("GanttView module not defined.");
+            }
+        } else if (targetViewId === 'reporting-view') {
+            if (typeof ReportingView !== 'undefined') {
+                ReportingView.show();
+            } else {
+                const reportingViewEl = document.getElementById('reporting-view');
+                if (reportingViewEl) reportingViewEl.style.display = 'block';
+                console.error("ReportingView module not defined.");
             }
         } else if (targetViewId === 'settings-view') {
              if (typeof SettingsView !== 'undefined') {
@@ -76,6 +86,7 @@ const Header = (() => {
     function init() {
         sprintBoardBtn = document.getElementById('sprint-board-btn');
         ganttViewBtn = document.getElementById('gantt-view-btn');
+        reportingBtn = document.getElementById('reporting-btn');
         settingsBtn = document.getElementById('settings-btn');
         headerControlsEl = document.getElementById('header-controls'); // Get reference to the header-controls div
         viewToggleButtons = document.querySelectorAll('.view-toggle-btn');
@@ -85,6 +96,9 @@ const Header = (() => {
         }
         if (ganttViewBtn) {
             ganttViewBtn.addEventListener('click', () => _switchView('gantt-view'));
+        }
+        if (reportingBtn) {
+            reportingBtn.addEventListener('click', () => _switchView('reporting-view'));
         }
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => _switchView('settings-view'));
