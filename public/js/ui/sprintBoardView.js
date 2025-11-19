@@ -5,6 +5,7 @@ const SprintBoardView = (() => {
     let currentFilterString = ''; // Stores the current filter string
     let currentTrafficLightFilter = 'all'; // Stores the current traffic light filter
     let filterTimeout = null;    // For debouncing the filter input
+    let trafficLightsVisible = false; // Track whether traffic lights are visible across re-renders
 
     /**
      * Initializes the Sprint Board View.
@@ -208,7 +209,10 @@ const SprintBoardView = (() => {
      */
     function _createTrafficLightComponent(task) {
         const container = createElement('div', 'traffic-light-container');
-        container.classList.add('hidden'); // Hidden by default
+        // Only add 'hidden' class if traffic lights are not currently visible
+        if (!trafficLightsVisible) {
+            container.classList.add('hidden');
+        }
         
         const redLight = createElement('div', 'traffic-light', { 'data-color': 'red' });
         const amberLight = createElement('div', 'traffic-light', { 'data-color': 'amber' });
@@ -292,7 +296,7 @@ const SprintBoardView = (() => {
      * @private
      */
     function _renderInternal() {
-        let allTasks = Storage.getTasks(); // Ensure allTasks is defined at the start
+        let allTasks = Storage.getTasks(); // Ensure allTasks is defined at start
         if (!sprintBoardViewElement) {
             console.error("Sprint Board view element not found in DOM for _renderInternal.");
             init(); // Attempt to re-initialize if element is lost
@@ -350,32 +354,27 @@ const SprintBoardView = (() => {
         
         // Add a toggle button for traffic light visibility
         const toggleTrafficLightsBtn = createElement('button', 'toggle-traffic-lights-btn');
-        toggleTrafficLightsBtn.textContent = 'Show'; // Start with 'Show' since lights are hidden by default
+        toggleTrafficLightsBtn.textContent = trafficLightsVisible ? 'Hide' : 'Show'; // Set button text based on current state
         toggleTrafficLightsBtn.title = 'Toggle traffic light visibility';
         
         // Add click event listener for the toggle button
         toggleTrafficLightsBtn.addEventListener('click', () => {
+            trafficLightsVisible = !trafficLightsVisible; // Toggle the state
             const taskCards = document.querySelectorAll('.task-card');
-            let areHidden = true; // Will be updated based on actual state
             
             taskCards.forEach(card => {
                 const trafficLightContainer = card.querySelector('.traffic-light-container');
                 if (trafficLightContainer) {
-                    trafficLightContainer.classList.toggle('hidden');
+                    if (trafficLightsVisible) {
+                        trafficLightContainer.classList.remove('hidden');
+                    } else {
+                        trafficLightContainer.classList.add('hidden');
+                    }
                 }
             });
             
-            // Check the state after toggling to determine button text
-            const firstCard = document.querySelector('.task-card');
-            if (firstCard) {
-                const firstTrafficLight = firstCard.querySelector('.traffic-light-container');
-                if (firstTrafficLight) {
-                    areHidden = firstTrafficLight.classList.contains('hidden');
-                }
-            }
-            
             // Update button text based on current state
-            toggleTrafficLightsBtn.textContent = areHidden ? 'Show' : 'Hide';
+            toggleTrafficLightsBtn.textContent = trafficLightsVisible ? 'Hide' : 'Show';
         });
         
         // Add click event listeners for traffic light filters
@@ -532,7 +531,7 @@ const SprintBoardView = (() => {
             });
         }
 
-        // Add the "Add Sprint" button after the last sprint column
+        // Add "Add Sprint" button after the last sprint column
         const addSprintButton = createElement('button', 'global-add-sprint-btn', null, '+ Add Sprint');
         addSprintButton.addEventListener('click', () => {
             if (typeof AddSprintModal !== 'undefined') {
@@ -579,7 +578,7 @@ const SprintBoardView = (() => {
                 input.replaceWith(nameElement);
                 _renderInternal(); // Re-render to ensure consistency across the board
             } else {
-                // If no change or invalid input, revert the text and replace input
+                // If no change or invalid input, revert the text and replace the input
                 nameElement.textContent = oldName;
                 input.replaceWith(nameElement);
                 _renderInternal(); // Re-render to ensure consistency across the board
@@ -676,9 +675,9 @@ const SprintBoardView = (() => {
             if (sprintToUpdate && !isNaN(newCapacity) && newCapacity >= 0 && newCapacity !== oldCapacity) {
                 sprintToUpdate.capacity = newCapacity;
                 Storage.saveSprints(currentSprints);
-                _renderInternal(); // Re-render to update display and capacity check
+                _renderInternal(); // Re-render to update the display and capacity check
             } else {
-                // Revert to old display if input is invalid or not changed
+                // Revert to the old display if input is invalid or not changed
                 _updateSprintStoryPointsDisplay(sprint.id, Storage.getTasksBySprintId(sprint.id).reduce((sum, t) => sum + (t.storyPoints || 0), 0), oldCapacity);
             }
             input.replaceWith(storyPointsElement);
