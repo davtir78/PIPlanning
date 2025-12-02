@@ -67,3 +67,11 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# PIPlanner Memory Bank files
+projectbrief.md
+productContext.md
+techContext.md
+systemPatterns.md
+activeContext.md
+progress.md
