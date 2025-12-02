@@ -3,25 +3,25 @@
 ## Current Development Context
 
 ### Immediate Focus
-**Date**: 2025-11-19  
-**Primary Task**: Fix traffic light disappearing bug
+**Date**: 2025-12-03  
+**Primary Task**: Fix Dependent Team import issue from Excel
 **Status**: ✅ COMPLETED
 
 ### Bug Fix Details
-- **Issue**: When users clicked traffic light colours, the entire traffic light UI would disappear
-- **Root Cause**: Traffic light containers were always hidden by default on every re-render, with no state preservation
-- **Solution Implemented**: Added `trafficLightsVisible` module variable to track visibility state across re-renders
+- **Issue**: Dependent team data from Excel files was not being imported and set on tasks.
+- **Root Cause**: The `_parseJIRAData` function in `public/js/importExport.js` was missing the logic to extract the 'Custom field (Dependent Team)' or 'Dependent Team' column and assign it to the `task.dependentTeam` property.
+- **Solution Implemented**: Added field mapping for `dependentTeam` during task object creation in `_parseJIRAData`.
 
 ### Changes Made
-1. **Added state tracking**: `trafficLightsVisible = false` flag
-2. **Conditional visibility**: Modified `_createTrafficLightComponent()` to only add 'hidden' class when lights are not visible
-3. **Toggle logic**: Updated Show/Hide button to use and update the flag
-4. **State preservation**: Button text now reflects current visibility state
+1. **Added extraction logic**: `const dependentTeam = row['Custom field (Dependent Team)'] || row['Dependent Team'] || null;`
+2. **Added assignment to task object**: `dependentTeam: dependentTeam`
+3. **Updated File**: Modified `public/js/importExport.js` to include these changes.
 
 ### User Impact
-- ✅ Traffic lights remain visible after colour selection
-- ✅ Show/Hide toggle works correctly and persists state
-- ✅ No more need to manually re-show traffic lights after clicking
+- ✅ Dependent team data from Excel files is now correctly imported and associated with tasks.
+- ✅ The data is available in the Task Property Panel upon opening a task card.
+- ✅ The data can be used for filtering tasks on the Sprint Board.
+- ✅ No breaking changes to existing functionality; import is backward compatible.
 
 ### Next Immediate Tasks
 - Monitor for any additional UI issues reported
@@ -32,4 +32,4 @@
 - None introduced with this fix
 
 ---
-*Last Updated: 2025-11-19*
+*Last Updated: 2025-12-03*

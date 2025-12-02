@@ -53,6 +53,7 @@
             } else if (issueType === 'Story' || issueType === 'Task' || issueType === 'Bug') {
                 const issueColor = row['Custom field (Issue color)'] || row['Issue color'] || ''; // Flexible mapping for issue color
                 const trafficLightStatus = row['Custom field (Traffic Light Status)'] || row['Traffic Light Status'] || null; // Map traffic light status
+                const dependentTeam = row['Custom field (Dependent Team)'] || row['Dependent Team'] || null; // Map dependent team
                 const task = {
                     id: issueKey,
                     name: summary,
@@ -70,7 +71,8 @@
                     sprintName: sprintName || null, // Link to sprint if available (from 'Sprint' column)
                     sprintRef: sprintField || null, // Unified sprint reference (could be SprintAssignment or Sprint)
                     color: issueColor, // Map issue color to task color
-                    trafficLightStatus: trafficLightStatus // Map traffic light status
+                    trafficLightStatus: trafficLightStatus, // Map traffic light status
+                    dependentTeam: dependentTeam // Map dependent team
                 };
                 tasks.push(task);
 
