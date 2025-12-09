@@ -103,7 +103,44 @@ window.Storage = (() => { // Assign the returned object to the global window.Sto
 
     // Feature Templates
     function getFeatureTemplates() {
-        return getItem(LOCAL_STORAGE_KEY_FEATURE_TEMPLATES) || [];
+        let templates = getItem(LOCAL_STORAGE_KEY_FEATURE_TEMPLATES);
+
+        // Migration Check 1: If templates is an array of strings (oldest format), convert to new object format
+        if (Array.isArray(templates) && templates.length > 0 && typeof templates[0] === 'string') {
+            console.log("storage.js: Detected legacy feature templates (strings). Migrating to new format...");
+            const defaultTemplate = {
+                id: 'default-template-' + Date.now(),
+                name: 'Default Template',
+                items: templates.map(suffix => ({
+                    taskName: suffix, // Map string directly to taskName
+                    points: 0
+                }))
+            };
+            templates = [defaultTemplate];
+            saveFeatureTemplates(templates);
+            console.log("storage.js: Migration complete (Stage 1).", templates);
+        }
+
+        // Migration Check 2: If templates have 'suffix' property (intermediate format), rename to 'taskName'
+        if (Array.isArray(templates) && templates.length > 0 && typeof templates[0] === 'object') {
+            let changed = false;
+            templates.forEach(t => {
+                if (t.items && t.items.length > 0 && t.items[0].hasOwnProperty('suffix')) {
+                    console.log(`storage.js: Migrating template "${t.name}" items from 'suffix' to 'taskName'...`);
+                    t.items = t.items.map(item => ({
+                        taskName: item.suffix,
+                        points: item.points
+                    }));
+                    changed = true;
+                }
+            });
+            if (changed) {
+                saveFeatureTemplates(templates);
+                console.log("storage.js: Migration complete (Stage 2 - suffix rename).", templates);
+            }
+        }
+
+        return templates || [];
     }
     function saveFeatureTemplates(templates) {
         setItem(LOCAL_STORAGE_KEY_FEATURE_TEMPLATES, templates);

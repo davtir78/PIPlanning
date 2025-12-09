@@ -5,7 +5,7 @@
  * using XLSX format, and general application data.
  * It leverages the SheetJS library for XLSX operations.
  */
-(function() {
+(function () {
     'use strict';
 
     // --- Private Functions ---
@@ -152,7 +152,7 @@
      */
     function _parseXLSX(file, callback) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             try {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
@@ -164,7 +164,7 @@
                 callback(error, null);
             }
         };
-        reader.onerror = function(e) {
+        reader.onerror = function (e) {
             callback(e, null);
         };
         reader.readAsArrayBuffer(file);
@@ -183,7 +183,7 @@
     function importJIRA(file, callback, errorCallback) {
         console.log('Starting JIRA XLSX import for file:', file.name);
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             try {
                 const arrayBuffer = e.target.result;
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -230,7 +230,23 @@
                             importedDependentTeams = importedDependentTeams.concat(json.map(row => row['Team Name']));
                             break;
                         case 'feature templates':
-                            importedFeatureTemplates = importedFeatureTemplates.concat(json.map(row => row['Template Name']));
+                            importedFeatureTemplates = importedFeatureTemplates.concat(json.map(row => {
+                                // Check for new format first
+                                if (row['Items (JSON)']) {
+                                    try {
+                                        return {
+                                            id: row['Template ID'] || 'template-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                                            name: row['Template Name'],
+                                            items: JSON.parse(row['Items (JSON)'])
+                                        };
+                                    } catch (e) {
+                                        console.warn("Error parsing feature template items JSON:", e);
+                                        return null;
+                                    }
+                                }
+                                // Fallback to legacy format (just name/suffix string)
+                                return row['Template Name'];
+                            }).filter(t => t));
                             break;
                         default:
                             console.warn(`Unknown sheet name encountered during JIRA import: ${sheetName}. Skipping.`);
@@ -256,7 +272,33 @@
                 Storage.saveEpics(importedEpics);
                 Storage.saveTasks(importedTasks);
                 Storage.saveDependentTeams(importedDependentTeams);
-                Storage.saveFeatureTemplates(importedFeatureTemplates);
+                Storage.saveDependentTeams(importedDependentTeams);
+
+                // Normalization for Feature Templates (Legacy vs New)
+                const simpleStrings = importedFeatureTemplates.filter(t => typeof t === 'string');
+                const complexObjects = importedFeatureTemplates.filter(t => typeof t === 'object' && t !== null);
+
+                if (simpleStrings.length > 0) {
+                    const defaultTemplate = {
+                        id: 'imported-legacy-' + Date.now(),
+                        name: 'Imported (Legacy)',
+                        items: simpleStrings.map(s => ({ taskName: s, points: 0 }))
+                    };
+                    complexObjects.push(defaultTemplate);
+                }
+
+                // Ensure converted objects use taskName if they came from intermediate format
+                complexObjects.forEach(t => {
+                    if (t.items) {
+                        t.items = t.items.map(i => ({
+                            taskName: i.taskName || i.suffix,
+                            points: i.points
+                        }));
+                    }
+                });
+
+                Storage.saveFeatureTemplates(complexObjects);
+                console.log('Feature Templates saved:', complexObjects.length);
 
                 alert('JIRA data imported successfully!');
                 if (callback && typeof callback === 'function') {
@@ -271,7 +313,7 @@
                 }
             }
         };
-        reader.onerror = function(e) {
+        reader.onerror = function (e) {
             console.error('FileReader error during JIRA import:', e);
             alert('Failed to read JIRA file.');
             if (errorCallback && typeof errorCallback === 'function') {
@@ -371,9 +413,19 @@
         }
 
         // --- Sheet 5: Feature Templates (raw data) ---
-        // Convert array of strings to array of objects for XLSX export
+        // Export with support for new object structure
         if (featureTemplates.length > 0) {
-            const templatesForSheet = featureTemplates.map(template => ({ 'Template Name': template }));
+            const templatesForSheet = featureTemplates.map(template => {
+                if (typeof template === 'string') {
+                    // Should verify storage migration happened, but handle just in case
+                    return { 'Template Name': template };
+                }
+                return {
+                    'Template ID': template.id,
+                    'Template Name': template.name,
+                    'Items (JSON)': JSON.stringify(template.items)
+                };
+            });
             const worksheet = XLSX.utils.json_to_sheet(templatesForSheet);
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Feature Templates');
         }
@@ -432,7 +484,7 @@
     function importAllData(file, callback, errorCallback) {
         console.log('Starting All Data XLSX import for file:', file.name);
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             try {
                 const arrayBuffer = e.target.result;
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -496,7 +548,18 @@
                             tempDependentTeams = json.map(d => d['Dependent Team Name']);
                             break;
                         case 'feature templates':
-                            tempFeatureTemplates = json.map(f => f['Feature Template']);
+                            tempFeatureTemplates = json.map(f => {
+                                if (f['Items (JSON)']) {
+                                    try {
+                                        return {
+                                            id: f['Template ID'] || 'template-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+                                            name: f['Template Name'],
+                                            items: JSON.parse(f['Items (JSON)'])
+                                        };
+                                    } catch (e) { return null; }
+                                }
+                                return f['Feature Template'] || f['Template Name']; // Support legacy column names
+                            }).filter(t => t);
                             break;
                         default:
                             console.warn(`Unknown sheet name encountered during import: ${sheetName}. Normalized: ${normalizedSheetName}`);
@@ -555,7 +618,7 @@
                 // Save data to Storage in correct order
                 console.log('Saving imported data to Storage...');
                 // Access Storage here to ensure it's fully initialized
-                const Storage = window.Storage; 
+                const Storage = window.Storage;
                 Storage.saveSprints(tempSprints);
                 console.log('Sprints saved:', tempSprints.length);
                 Storage.saveEpics(finalEpics); // Save finalEpics with linked tasks
@@ -564,8 +627,33 @@
                 console.log('Tasks saved:', finalTasks.length);
                 Storage.saveDependentTeams(tempDependentTeams);
                 console.log('Dependent Teams saved:', tempDependentTeams.length);
-                Storage.saveFeatureTemplates(tempFeatureTemplates);
-                console.log('Feature Templates saved:', tempFeatureTemplates.length);
+                console.log('Dependent Teams saved:', tempDependentTeams.length);
+
+                // Normalization for All Data Import as well
+                const simpleStringsAll = tempFeatureTemplates.filter(t => typeof t === 'string');
+                const complexObjectsAll = tempFeatureTemplates.filter(t => typeof t === 'object' && t !== null);
+
+                if (simpleStringsAll.length > 0) {
+                    const defaultTemplateAll = {
+                        id: 'imported-legacy-' + Date.now(),
+                        name: 'Imported (Legacy)',
+                        items: simpleStringsAll.map(s => ({ taskName: s, points: 0 }))
+                    };
+                    complexObjectsAll.push(defaultTemplateAll);
+                }
+
+                // Ensure converted objects use taskName if they came from intermediate format
+                complexObjectsAll.forEach(t => {
+                    if (t.items) {
+                        t.items = t.items.map(i => ({
+                            taskName: i.taskName || i.suffix,
+                            points: i.points
+                        }));
+                    }
+                });
+
+                Storage.saveFeatureTemplates(complexObjectsAll);
+                console.log('Feature Templates saved:', complexObjectsAll.length);
 
                 alert('All application data imported successfully!');
                 // Execute callback if provided
@@ -581,7 +669,7 @@
                 }
             }
         };
-        reader.onerror = function(e) {
+        reader.onerror = function (e) {
             console.error('FileReader error during all data import:', e);
             alert('Failed to read all data file.');
             if (errorCallback && typeof errorCallback === 'function') {

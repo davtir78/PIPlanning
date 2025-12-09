@@ -86,7 +86,7 @@ const SettingsView = (() => {
                         <h2>Manage Feature Templates</h2>
                         <ul class="item-list" id="feature-templates-list"></ul>
                         <div class="add-item-form">
-                            <input type="text" id="new-feature-template-name" placeholder="New Template Suffix">
+                            <input type="text" id="new-feature-template-name" placeholder="New Template Name">
                             <button id="add-feature-template-btn" class="btn btn-primary-green">Add Template</button>
                         </div>
                     </div>
@@ -133,6 +133,41 @@ const SettingsView = (() => {
                         <h2>Privacy Policy</h2>
                         <div id="privacy-policy-content"></div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Hidden Template Edit Modal (Created on init) -->
+            <div id="settings-template-modal" class="modal" style="display: none;">
+                <div class="modal-content" style="max-width: 600px; width: 90%;">
+                    <h2 id="settings-template-modal-title">Edit Feature Template</h2>
+                    <form id="settings-template-form">
+                        <div style="margin-bottom: 15px;">
+                            <label for="settings-template-name-input">Template Name:</label>
+                            <input type="text" id="settings-template-name-input" required style="width: 100%;">
+                        </div>
+                        
+                        <label>Tasks in this Template:</label>
+                        <div id="settings-template-items-container" style="border: 1px solid #ccc; padding: 10px; max-height: 300px; overflow-y: auto; margin-bottom: 10px; background: #f9f9f9;">
+                            <!-- Items will be injected here -->
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; background: #eee; padding: 10px; border-radius: 4px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 0.8em;">New Task Name</label>
+                                <input type="text" id="settings-new-item-taskname" placeholder="E.g., API Endpoint" style="width: 100%;">
+                            </div>
+                            <div style="width: 70px;">
+                                <label style="font-size: 0.8em;">Points</label>
+                                <input type="number" id="settings-new-item-points" placeholder="0" min="0" style="width: 100%;">
+                            </div>
+                            <button type="button" id="settings-add-item-btn" class="btn btn-secondary" style="margin-bottom: 2px;">Add</button>
+                        </div>
+
+                        <div class="modal-footer" style="text-align: right;">
+                            <button type="submit" id="settings-save-template-btn" class="button-primary">Save Changes</button>
+                            <button type="button" id="settings-cancel-template-btn" class="button-secondary">Cancel</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         `;
@@ -281,7 +316,7 @@ This modal is used when adding a task from a predefined template:
             if (dependentTeams && dependentTeams.length > 0) {
                 dependentTeams.forEach(teamName => {
                     const teamEl = createElement('li'); // Changed to li for ul
-                     // For dependent teams, the name is the value/ID for now
+                    // For dependent teams, the name is the value/ID for now
                     teamEl.innerHTML = `
                         <span>${teamName}</span>
                         <div class="actions">
@@ -300,12 +335,16 @@ This modal is used when adding a task from a predefined template:
         if (featureTemplatesListEl) {
             if (featureTemplates && featureTemplates.length > 0) {
                 featureTemplates.forEach(template => {
-                    const templateEl = createElement('li'); // Changed to li for ul
+                    const templateEl = createElement('li');
+                    // Handle migration case where template might still be a string (should be caught by storage.js, but defensive)
+                    const templateName = typeof template === 'string' ? template : template.name;
+                    const templateId = typeof template === 'string' ? template : template.id;
+
                     templateEl.innerHTML = `
-                        <span>${template}</span>
+                        <span>${templateName}</span>
                         <div class="actions">
-                            <button class="edit-btn btn btn-edit" data-name="${template}">Edit</button>
-                            <button class="delete-btn btn btn-danger-outline" data-name="${template}">Delete</button>
+                            <button class="edit-btn btn btn-edit" data-id="${templateId}">Edit</button>
+                            <button class="delete-btn btn btn-danger-outline" data-id="${templateId}">Delete</button>
                         </div>
                     `;
                     featureTemplatesListEl.appendChild(templateEl);
@@ -371,13 +410,19 @@ This modal is used when adding a task from a predefined template:
             if (listEl) {
                 listEl.addEventListener('click', (event) => {
                     const target = event.target;
+                    // Handle clicks within the edits (like delete item button inside the edit form)
+                    if (target.classList.contains('delete-item-btn')) {
+                        // handled inside the render function for edit usually, or we can delegate here
+                        // but for now let's focus on the main buttons
+                    }
+
                     if (target.classList.contains('edit-btn')) {
                         if (listEl.id === 'epics-list') {
                             _handleEditEpic(target.dataset.id);
                         } else if (listEl.id === 'dependent-teams-list') {
                             _handleEditDependentTeam(target.dataset.name);
                         } else if (listEl.id === 'feature-templates-list') {
-                            _handleEditFeatureTemplate(target.dataset.name);
+                            _handleEditFeatureTemplate(target.dataset.id); // Changed to ID
                         }
                     } else if (target.classList.contains('delete-btn')) {
                         if (listEl.id === 'epics-list') {
@@ -385,7 +430,7 @@ This modal is used when adding a task from a predefined template:
                         } else if (listEl.id === 'dependent-teams-list') {
                             _handleDeleteDependentTeam(target.dataset.name);
                         } else if (listEl.id === 'feature-templates-list') {
-                            _handleDeleteFeatureTemplate(target.dataset.name);
+                            _handleDeleteFeatureTemplate(target.dataset.id); // Changed to ID
                         }
                     }
                 });
@@ -420,6 +465,121 @@ This modal is used when adding a task from a predefined template:
         if (clearAllDataBtn) {
             clearAllDataBtn.addEventListener('click', _handleClearAllData);
         }
+
+        // Initialize Template Modal Events
+        _initTemplateModal();
+    }
+
+    // --- Template Modal Logic ---
+    let currentEditingTemplateId = null;
+    let currentTemplateItems = [];
+
+    function _initTemplateModal() {
+        const modal = settingsViewEl.querySelector('#settings-template-modal');
+        const form = settingsViewEl.querySelector('#settings-template-form');
+        const cancelBtn = settingsViewEl.querySelector('#settings-cancel-template-btn');
+        const addItemBtn = settingsViewEl.querySelector('#settings-add-item-btn');
+        const displayList = settingsViewEl.querySelector('#settings-template-items-container');
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+
+        if (addItemBtn) {
+            addItemBtn.addEventListener('click', () => {
+                const taskNameInput = settingsViewEl.querySelector('#settings-new-item-taskname');
+                const pointsInput = settingsViewEl.querySelector('#settings-new-item-points');
+                const taskName = taskNameInput.value.trim();
+                const points = parseInt(pointsInput.value) || 0;
+
+                if (taskName) {
+                    currentTemplateItems.push({ taskName, points });
+                    taskNameInput.value = '';
+                    pointsInput.value = '';
+                    taskNameInput.focus();
+                    _renderTemplateModalItems();
+                }
+            });
+        }
+
+        // Form Submit (Save)
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameInput = settingsViewEl.querySelector('#settings-template-name-input');
+                const newName = nameInput.value.trim();
+
+                if (currentEditingTemplateId) {
+                    _saveEditedFeatureTemplate(currentEditingTemplateId, newName, currentTemplateItems);
+                }
+                modal.style.display = 'none';
+            });
+        }
+
+        // Event delegation for deleting items AND editing items within the modal list
+        if (displayList) {
+            displayList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-item-btn')) {
+                    const index = parseInt(e.target.dataset.index);
+                    currentTemplateItems.splice(index, 1);
+                    _renderTemplateModalItems();
+                }
+            });
+
+            // Listen for input changes to update state immediately
+            displayList.addEventListener('input', (e) => {
+                if (e.target.classList.contains('item-taskname-input')) {
+                    const index = parseInt(e.target.dataset.index);
+                    currentTemplateItems[index].taskName = e.target.value;
+                }
+                if (e.target.classList.contains('item-points-input')) {
+                    const index = parseInt(e.target.dataset.index);
+                    currentTemplateItems[index].points = parseInt(e.target.value) || 0;
+                }
+            });
+        }
+    }
+
+    function _renderTemplateModalItems() {
+        const container = settingsViewEl.querySelector('#settings-template-items-container');
+        if (!container) return;
+
+        if (currentTemplateItems.length === 0) {
+            container.innerHTML = '<p style="color: #888; text-align: center;">No tasks in this template yet.</p>';
+            return;
+        }
+
+        container.innerHTML = currentTemplateItems.map((item, index) => `
+            <div style="display: flex; gap: 10px; align-items: center; padding: 5px; border-bottom: 1px solid #eee; background: white;">
+                <div style="flex: 1;">
+                    <input type="text" class="item-taskname-input" data-index="${index}" value="${item.taskName}" placeholder="Task Name" style="width: 100%;">
+                </div>
+                <div style="width: 70px;">
+                    <input type="number" class="item-points-input" data-index="${index}" value="${item.points}" min="0" placeholder="Pts" style="width: 100%;">
+                </div>
+                <button type="button" class="btn btn-danger-outline btn-sm delete-item-btn" data-index="${index}" tabindex="-1">x</button>
+            </div>
+        `).join('');
+    }
+
+    function _openTemplateModal(templateId) {
+        const templates = Storage.getFeatureTemplates();
+        const template = templates.find(t => t.id === templateId);
+        if (!template) return;
+
+        currentEditingTemplateId = templateId;
+        // Deep copy items to avoid mutating state before save
+        currentTemplateItems = JSON.parse(JSON.stringify(template.items || []));
+
+        const modal = settingsViewEl.querySelector('#settings-template-modal');
+        const nameInput = settingsViewEl.querySelector('#settings-template-name-input');
+
+        nameInput.value = template.name;
+        _renderTemplateModalItems();
+
+        modal.style.display = 'flex';
     }
 
     /**
@@ -465,7 +625,7 @@ This modal is used when adding a task from a predefined template:
         }
 
         const dependentTeams = Storage.getDependentTeams();
-         // Check if team already exists (case-insensitive)
+        // Check if team already exists (case-insensitive)
         if (dependentTeams.some(t => t.toLowerCase() === name.toLowerCase())) {
             alert(`Dependent team "${name}" already exists.`);
             return;
@@ -525,7 +685,7 @@ This modal is used when adding a task from a predefined template:
                 // Revert to original HTML
                 epicEl.innerHTML = epicEl.dataset.originalHtml;
                 delete epicEl.dataset.originalHtml; // Clean up data attribute
-                 // Re-attach event listeners for the reverted buttons (delegation handles this)
+                // Re-attach event listeners for the reverted buttons (delegation handles this)
             });
         }
 
@@ -553,7 +713,7 @@ This modal is used when adding a task from a predefined template:
         const epicIndex = epics.findIndex(e => e.id === epicId);
 
         if (epicIndex > -1) {
-             // Check if the new name conflicts with existing epics (excluding the one being edited)
+            // Check if the new name conflicts with existing epics (excluding the one being edited)
             if (epics.some((e, index) => index !== epicIndex && e.name.toLowerCase() === newName.toLowerCase())) {
                 alert(`Epic "${newName}" already exists.`);
                 return;
@@ -640,7 +800,7 @@ This modal is used when adding a task from a predefined template:
                 // Revert to original HTML
                 teamEl.innerHTML = teamEl.dataset.originalHtml;
                 delete teamEl.dataset.originalHtml; // Clean up data attribute
-                 // Re-attach event listeners for the reverted buttons (delegation handles this)
+                // Re-attach event listeners for the reverted buttons (delegation handles this)
             });
         }
 
@@ -659,7 +819,7 @@ This modal is used when adding a task from a predefined template:
      * @private
      */
     function _saveEditedDependentTeam(originalName, newName) {
-         if (!newName) {
+        if (!newName) {
             alert("Dependent team name cannot be empty.");
             return;
         }
@@ -668,7 +828,7 @@ This modal is used when adding a task from a predefined template:
         const teamIndex = dependentTeams.findIndex(t => t === originalName);
 
         if (teamIndex > -1) {
-             // Check if the new name conflicts with existing teams (excluding the one being edited)
+            // Check if the new name conflicts with existing teams (excluding the one being edited)
             if (dependentTeams.some((t, index) => index !== teamIndex && t.toLowerCase() === newName.toLowerCase())) {
                 alert(`Dependent team "${newName}" already exists.`);
                 return;
@@ -688,11 +848,11 @@ This modal is used when adding a task from a predefined template:
      * @private
      */
     function _handleDeleteDependentTeam(teamName) {
-         if (confirm(`Are you sure you want to delete the dependent team "${teamName}"? This cannot be undone.`)) {
+        if (confirm(`Are you sure you want to delete the dependent team "${teamName}"? This cannot be undone.`)) {
             let dependentTeams = Storage.getDependentTeams();
             const initialLength = dependentTeams.length;
             dependentTeams = dependentTeams.filter(t => t !== teamName);
-             if (dependentTeams.length < initialLength) {
+            if (dependentTeams.length < initialLength) {
                 Storage.saveDependentTeams(dependentTeams);
                 renderSettings(); // Re-render the list
                 console.log(`Deleted dependent team: ${teamName}`);
@@ -715,12 +875,18 @@ This modal is used when adding a task from a predefined template:
         }
 
         const featureTemplates = Storage.getFeatureTemplates();
-        if (featureTemplates.some(t => t.toLowerCase() === name.toLowerCase())) {
+        if (featureTemplates.some(t => t.name.toLowerCase() === name.toLowerCase())) {
             alert(`Feature template "${name}" already exists.`);
             return;
         }
 
-        featureTemplates.push(name);
+        const newTemplate = {
+            id: 'template-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+            name: name,
+            items: [] // Empty items initially
+        };
+
+        featureTemplates.push(newTemplate);
         Storage.saveFeatureTemplates(featureTemplates);
         renderSettings();
         const newFeatureTemplateNameInput = settingsViewEl.querySelector('#new-feature-template-name');
@@ -731,105 +897,84 @@ This modal is used when adding a task from a predefined template:
 
     /**
      * Handles editing a feature template.
-     * @param {string} templateName - The name of the feature template to edit.
+     * @param {string} templateId - The ID of the feature template to edit.
      * @private
      */
-    function _handleEditFeatureTemplate(templateName) {
+    function _handleEditFeatureTemplate(templateId) {
         const featureTemplatesListEl = settingsViewEl.querySelector('#feature-templates-list');
-        let templateEl = null;
-        featureTemplatesListEl.querySelectorAll('li').forEach(el => { // Changed to li
-            if (el.querySelector('span')?.textContent === templateName) {
-                templateEl = el;
-            }
-        });
+        const editBtn = featureTemplatesListEl.querySelector(`button[data-id="${templateId}"]`);
+        if (!editBtn) return;
 
-        if (!templateEl) {
-            console.error(`Feature template element not found for editing: ${templateName}`);
+        const templateEl = editBtn.closest('li');
+        const templates = Storage.getFeatureTemplates();
+        const template = templates.find(t => t.id === templateId);
+
+        if (!templateEl || !template) {
+            console.error(`Feature template element or data not found for editing ID: ${templateId}`);
             return;
         }
 
         const originalHTML = templateEl.innerHTML;
         templateEl.dataset.originalHtml = originalHTML;
 
-        templateEl.innerHTML = `
-            <input type="text" class="edit-input" value="${templateName}">
-            <div class="actions">
-                <button class="save-edit-btn btn btn-primary-green" data-name="${templateName}">Save</button>
-                <button class="cancel-edit-btn btn btn-secondary" data-name="${templateName}">Cancel</button>
-            </div>
-        `;
-
-        const saveEditBtn = templateEl.querySelector('.save-edit-btn');
-        const cancelEditBtn = templateEl.querySelector('.cancel-edit-btn');
-        const editInput = templateEl.querySelector('.edit-input');
-
-        if (saveEditBtn) {
-            saveEditBtn.addEventListener('click', () => {
-                const newName = editInput.value.trim();
-                _saveEditedFeatureTemplate(templateName, newName);
-            });
-        }
-
-        if (cancelEditBtn) {
-            cancelEditBtn.addEventListener('click', () => {
-                templateEl.innerHTML = templateEl.dataset.originalHtml;
-                delete templateEl.dataset.originalHtml;
-            });
-        }
-
-        if (editInput) {
-            editInput.focus();
-            editInput.select();
-        }
-
-        console.log(`Editing feature template: ${templateName}`);
+        // Simply open the modal for the given template ID
+        _openTemplateModal(templateId);
     }
 
     /**
-     * Saves the edited feature template name.
-     * @param {string} originalName - The original name of the feature template.
+     * Saves the edited feature template.
+     * @param {string} templateId - The ID of the feature template.
      * @param {string} newName - The new name for the feature template.
+     * @param {Array} newItems - The new items list.
      * @private
      */
-    function _saveEditedFeatureTemplate(originalName, newName) {
+    function _saveEditedFeatureTemplate(templateId, newName, newItems) {
         if (!newName) {
             alert("Feature template name cannot be empty.");
             return;
         }
 
         let featureTemplates = Storage.getFeatureTemplates();
-        const templateIndex = featureTemplates.findIndex(t => t === originalName);
+        const templateIndex = featureTemplates.findIndex(t => t.id === templateId);
 
         if (templateIndex > -1) {
-            if (featureTemplates.some((t, index) => index !== templateIndex && t.toLowerCase() === newName.toLowerCase())) {
+            if (featureTemplates.some((t, index) => index !== templateIndex && t.name.toLowerCase() === newName.toLowerCase())) {
                 alert(`Feature template "${newName}" already exists.`);
+                // Note: User will lose edits if we just return here. Ideally we should keep the form open.
+                // But for now, we follow existing pattern.
                 return;
             }
-            featureTemplates[templateIndex] = newName;
+            featureTemplates[templateIndex].name = newName;
+            featureTemplates[templateIndex].items = newItems;
+
             Storage.saveFeatureTemplates(featureTemplates);
             renderSettings();
-            console.log(`Saved feature template "${originalName}" with new name: "${newName}"`);
+            console.log(`Saved feature template "${newName}"`);
         } else {
-            console.error(`Feature template "${originalName}" not found for saving.`);
+            console.error(`Feature template ID ${templateId} not found for saving.`);
         }
     }
 
     /**
      * Handles deleting a feature template.
-     * @param {string} templateName - The name of the feature template to delete.
+     * @param {string} templateId - The ID of the feature template to delete.
      * @private
      */
-    function _handleDeleteFeatureTemplate(templateName) {
-        if (confirm(`Are you sure you want to delete the feature template "${templateName}"? This cannot be undone.`)) {
+    function _handleDeleteFeatureTemplate(templateId) {
+        if (confirm(`Are you sure you want to delete this feature template? This cannot be undone.`)) {
             let featureTemplates = Storage.getFeatureTemplates();
             const initialLength = featureTemplates.length;
-            featureTemplates = featureTemplates.filter(t => t !== templateName);
+
+            // Check if templateId is string (name) - legacy support or defensive coding
+            // But we prefer ID. The filter below handles ID mismatch securely.
+            featureTemplates = featureTemplates.filter(t => t.id !== templateId);
+
             if (featureTemplates.length < initialLength) {
                 Storage.saveFeatureTemplates(featureTemplates);
                 renderSettings();
-                console.log(`Deleted feature template: ${templateName}`);
+                console.log(`Deleted feature template ID: ${templateId}`);
             } else {
-                console.warn(`Feature template "${templateName}" not found for deletion.`);
+                console.warn(`Feature template ID "${templateId}" not found for deletion.`);
             }
         }
     }

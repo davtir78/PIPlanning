@@ -4,7 +4,7 @@ const FeatureTemplateModal = (() => {
     let modalElement = null;
     let formElement = null;
     let featureNameInput = null;
-    let defaultPointsInput = null;
+    let templateSelect = null; // New template selector
     let colorPaletteContainer = null;
     let selectedColorInput = null; // Hidden input
     let componentSelect = null;
@@ -26,11 +26,11 @@ const FeatureTemplateModal = (() => {
             _createModalStructure();
             modalElement = document.getElementById('feature-template-modal');
         }
-        
+
         // Get other elements once modal structure is confirmed/created
         formElement = modalElement.querySelector('#feature-template-form');
         featureNameInput = modalElement.querySelector('#feature-name-input');
-        defaultPointsInput = modalElement.querySelector('#feature-default-points-input');
+        templateSelect = modalElement.querySelector('#feature-template-select'); // New element
         colorPaletteContainer = modalElement.querySelector('#feature-color-palette-container');
         selectedColorInput = modalElement.querySelector('#feature-selected-color-value');
         componentSelect = modalElement.querySelector('#feature-component-select');
@@ -45,7 +45,7 @@ const FeatureTemplateModal = (() => {
 
         formElement.addEventListener('submit', _handleGenerateFeatureTasks);
         cancelBtn.addEventListener('click', closeModal);
-        
+
         // Populate color palette (can also be done in openModal if colors might change)
         _populateColorPalette();
 
@@ -68,8 +68,10 @@ const FeatureTemplateModal = (() => {
                     <input type="text" id="feature-name-input" required>
                 </div>
                 <div>
-                    <label for="feature-default-points-input">Default Story Points (per task):</label>
-                    <input type="number" id="feature-default-points-input" value="${DEFAULT_FEATURE_TASK_POINTS}" min="0" required>
+                    <label for="feature-template-select">Select Template:</label>
+                    <select id="feature-template-select" required>
+                        <!-- Options here -->
+                    </select>
                 </div>
                 <div>
                     <label>Color (for all tasks):</label>
@@ -141,8 +143,8 @@ const FeatureTemplateModal = (() => {
 
         // Set a default active swatch
         const defaultColor = (PREDEFINED_TASK_COLOR_VALUES && PREDEFINED_TASK_COLOR_VALUES.length > 0)
-                               ? PREDEFINED_TASK_COLOR_VALUES[0]
-                               : (defaultTaskColor || '#D3D3D3');
+            ? PREDEFINED_TASK_COLOR_VALUES[0]
+            : (defaultTaskColor || '#D3D3D3');
         _setActiveColorSwatch(defaultColor);
     }
 
@@ -164,7 +166,7 @@ const FeatureTemplateModal = (() => {
             }
         });
     }
-    
+
     /**
      * Populates select dropdowns (Component, Dependent Team).
      * @private
@@ -196,23 +198,40 @@ const FeatureTemplateModal = (() => {
         if (!modalElement) {
             console.error("Feature Template Modal element not found. Ensure init() was called or structure exists.");
             // Attempt to initialize if not done (e.g. if called before DOMContentLoaded completion for main.js)
-            init(); 
+            init();
             if (!modalElement) return; // Still not found
         }
-        
+
         _populateSelects();
+        _populateTemplateSelect(); // New population function
         _populateColorPalette(); // Re-populate or ensure default is set
 
         // Reset form fields
         if (formElement) formElement.reset();
-        if (defaultPointsInput) defaultPointsInput.value = DEFAULT_FEATURE_TASK_POINTS;
+
         if (PREDEFINED_TASK_COLOR_VALUES.length > 0) {
-             _setActiveColorSwatch(PREDEFINED_TASK_COLOR_VALUES[0]);
+            _setActiveColorSwatch(PREDEFINED_TASK_COLOR_VALUES[0]);
         }
 
 
         modalElement.style.display = 'flex';
-        if(featureNameInput) featureNameInput.focus();
+        if (featureNameInput) featureNameInput.focus();
+    }
+
+    /**
+     * Populates the template select dropdown.
+     * @private
+     */
+    function _populateTemplateSelect() {
+        if (!templateSelect) return;
+        templateSelect.innerHTML = '<option value="">Select a Template</option>';
+        const templates = Storage.getFeatureTemplates();
+        templates.forEach(t => {
+            // handle migration case on the fly just in case, though Storage should handle simple strings
+            const id = typeof t === 'string' ? t : t.id;
+            const name = typeof t === 'string' ? t : t.name;
+            templateSelect.appendChild(createElement('option', null, { value: id }, name));
+        });
     }
 
     /**
@@ -232,7 +251,7 @@ const FeatureTemplateModal = (() => {
     function _handleGenerateFeatureTasks(event) {
         event.preventDefault();
         const featureName = featureNameInput.value.trim();
-        const defaultPoints = parseInt(defaultPointsInput.value, 10);
+        const templateId = templateSelect.value;
         const color = selectedColorInput.value;
         const componentId = componentSelect.value;
         const dependentTeam = dependentTeamSelect.value || null;
@@ -242,9 +261,9 @@ const FeatureTemplateModal = (() => {
             featureNameInput.focus();
             return;
         }
-        if (isNaN(defaultPoints) || defaultPoints < 0) {
-            alert("Default Story Points must be a non-negative number.");
-            defaultPointsInput.focus();
+        if (!templateId) {
+            alert("Please select a Template.");
+            templateSelect.focus();
             return;
         }
         if (!componentId) {
@@ -254,25 +273,47 @@ const FeatureTemplateModal = (() => {
         }
         if (!color) {
             alert("Please select a Color.");
-            // No specific element to focus, but palette should be visible
             return;
         }
 
-        let allTasks = Storage.getTasks(); // Use Storage object
+        let allTasks = Storage.getTasks();
         const newTasks = [];
-        const featureTemplates = Storage.getFeatureTemplates(); // Get configurable templates
+        const featureTemplates = Storage.getFeatureTemplates();
+        // find template by ID, or if legacy string list, find by name match (unlikely if migration works)
+        let template = featureTemplates.find(t => (t.id && t.id === templateId) || t === templateId);
 
-        if (featureTemplates.length === 0) {
-            alert("No feature templates configured. Please add some in Settings.");
+        if (!template) {
+            alert("Selected template not found.");
             return;
         }
 
-        featureTemplates.forEach(templateSuffix => {
-            const taskName = `${featureName} - ${templateSuffix}`;
+        // Handle legacy case if for some reason we have a string template (should have migrated but safety first)
+        let templateItems = [];
+        if (typeof template === 'string') {
+            // Treat string template as a single task suffix? Or unsupported?
+            // Since migration ensures object structure, we assume object.
+            // But if we encounter a string in the *list*, our populate logic used it as both ID and Name.
+            // In that fallback case, we can't really do much without items.
+            // We'll treat it as a task suffix itself with 0 points?
+            templateItems = [{ suffix: template, points: 0 }];
+        } else {
+            templateItems = template.items;
+        }
+
+
+        if (!templateItems || templateItems.length === 0) {
+            alert("The selected template has no tasks defined.");
+            return;
+        }
+
+        templateItems.forEach(item => {
+            // Updated to use taskName, falling back to suffix for safety during migration
+            const itemSuffix = item.taskName || item.suffix || 'Task';
+            const taskName = `${featureName} - ${itemSuffix}`;
             const newTaskId = generateUniqueId();
             const newTask = new Task(
                 taskName,
-                defaultPoints,
+                item.points, // Use per-item points
                 componentId,
                 'Backlog', // All template tasks go to backlog
                 color,
@@ -283,7 +324,7 @@ const FeatureTemplateModal = (() => {
         });
 
         allTasks = allTasks.concat(newTasks);
-        Storage.saveTasks(allTasks); // Use Storage object
+        Storage.saveTasks(allTasks);
 
         alert(`${newTasks.length} tasks generated for feature "${featureName}".`);
         closeModal();
