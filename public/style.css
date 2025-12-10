@@ -2,88 +2,168 @@
 
 /* Color Palette Variables */
 :root {
-    --primary-purple: #6A0DAD; /* Main brand purple */
-    --dark-purple: #4A0A7A;    /* Darker shade for text/accents */
-    --light-purple: #EAE6F0;   /* Very light purple for backgrounds */
-    --accent-green: #28A745;   /* Green for active states/primary actions */
-    --dark-green: #218838;     /* Darker green for hover */
-    --danger-red: #DC3545;     /* Red for warnings/errors */
-    --page-background: #F4F6F8; /* Light grey page background */
-    --column-background: #EAECEF; /* Light grey for column */
-    --card-background: #FFFFFF; /* White for task cards */
-    --text-color-dark: #333333; /* Dark text for main content */
-    --text-color-medium: #555555; /* Medium grey for meta info */
-    --text-color-light: #6c757d; /* Light grey for sub-info */
-    --border-color-light: #E0E0E0; /* Light border for cards */
-    --border-color-medium: #D1D5DB; /* Medium border for columns */
-    --shadow-light: rgba(0,0,0,0.07); /* Subtle shadow for cards */
-    --shadow-medium: rgba(0,0,0,0.1); /* Medium shadow for hover */
+    /* Brand Colors */
+    --primary-purple: #6A0DAD;
+    --dark-purple: #4A0A7A;
+    --accent-green: #00C853;
+    /* Brighter, neon green */
+    --dark-green: #009624;
+    --danger-red: #FF1744;
+    /* Brighter red */
+
+    /* Text Colors */
+    --text-color-dark: #2D3748;
+    --text-color-medium: #4A5568;
+    --text-color-light: #718096;
+
+    /* Glassmorphism Variables */
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-bg-darker: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --backdrop-blur: blur(12px);
+
+    /* Legacy variables mapping for compatibility */
+    --page-background: transparent;
+    /* Handled by body gradient */
+    --column-background: var(--glass-bg);
+    --card-background: rgba(255, 255, 255, 0.9);
+    --border-color-light: var(--glass-border);
+    --border-color-medium: rgba(0, 0, 0, 0.05);
+    --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-medium: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Basic Reset & Body Styling */
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: auto; /* Allow scrollbars on html/body if content overflows */
+    overflow: auto;
 }
 
-*, *::before, *::after {
-    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    background-color: var(--page-background);
+    /* Modern Mesh Gradient Background */
+    background-color: #f0f2f5;
+    background-image:
+        radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    /* Simpler, impactful gradient */
     color: var(--text-color-dark);
     line-height: 1.6;
-    display: flex; /* Enable flexbox */
-    flex-direction: column; /* Stack children vertically */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Panel Styling (Generic for slide-ins or sidebars) */
+.panel {
+    position: fixed;
+    /* Glass Effect */
+    background: var(--glass-bg-darker);
+    top: 60px;
+    right: 0;
+    width: 400px;
+    /* Default width */
+    height: calc(100% - 60px);
+    /* Glass Effect (Matched to Modal) */
+    background: rgba(235, 235, 235, 0.95);
+    /* Greyer background to match modal */
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border-left: 1px solid var(--glass-border);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    /* Slightly stronger shadow */
+
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: 900;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel.open {
+    transform: translateX(0);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+    /* Stronger shadow when open */
+}
+
+.panel-header {
+    padding: 20px 24px;
+    /* Increased padding */
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    /* Slightly more opaque header */
 }
 
 /* Header Styling */
 #app-header {
-    background-color: var(--primary-purple);
+    background: rgba(106, 13, 173, 0.85);
+    /* Semi-transparent primary purple */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: #FFFFFF;
-    padding: 10px 20px; /* Adjusted padding */
-    border-bottom: 1px solid var(--dark-purple); /* Darker shade of primary purple */
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header-title h1 {
     margin: 0;
     font-size: 1.8rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .header-nav button,
 .header-controls button {
     background-color: transparent;
     border: none;
-    color: #E0E0E0;
-    padding: 10px 20px; /* Increased padding */
-    margin: 0 5px; /* Adjusted margin */
-    border-bottom: 3px solid transparent; /* For the active indicator */
-    transition: color 0.3s ease, border-bottom-color 0.3s ease;
-    border-radius: 0; /* Remove border-radius for a tab look */
+    color: rgba(255, 255, 255, 0.8);
+    padding: 8px 16px;
+    margin: 0 4px;
+    border-radius: 20px;
+    /* Pill shape */
+    transition: all 0.3s ease;
     cursor: pointer;
     font-size: 0.9rem;
+    font-weight: 500;
+    border-bottom: none;
+    /* Remove old border style */
 }
 
 .header-nav button:hover,
 .header-controls button:hover {
     color: #FFFFFF;
-    background-color: transparent; /* Remove background color on hover */
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
 }
 
 .header-nav button.active {
     color: #FFFFFF;
-    font-weight: bold;
-    border-bottom-color: var(--accent-green); /* Highlight for active tab */
-    background-color: transparent; /* Ensure no background color for active tab */
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .header-controls {
@@ -93,34 +173,33 @@ body {
 
 /* Main Content Area */
 #app-main {
-    padding: 20px; /* Increased padding */
-    flex-grow: 1; /* Allow main content to take remaining vertical space */
-    display: flex; /* Make main a flex container */
-    flex-direction: column; /* Stack children vertically */
-    width: 100%; /* Ensure main takes full width */
-    overflow-y: auto; /* Allow vertical scrolling for main content */
-    overflow-x: hidden; /* Hide horizontal overflow */
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* View Styling */
 .view {
-    /* Basic styling for views, will be expanded */
-    border: none; /* Removed border */
-    background-color: transparent; /* Transparent background for content areas */
-    flex: 1; /* Allow views to grow and take available space */
-    display: flex; /* Make views flex containers for their content */
-    flex-direction: column; /* Stack content vertically within views */
+    border: none;
+    background-color: transparent;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Specific styling for gantt-view to ensure it takes full width and height */
+/* Specific styling for gantt-view */
 #gantt-view {
-    padding: 0; /* Remove padding to allow Gantt chart to fill completely */
-    margin-bottom: 0; /* Remove margin */
-    border: none; /* Remove border if Gantt chart has its own */
-    overflow: hidden; /* Hide any overflow from Gantt chart */
-    position: relative; /* Needed for DHTMLX Gantt to calculate sizes correctly in some layouts */
-    min-width: 0; /* Allow flex item to shrink */
-    min-height: 0; /* Allow flex item to shrink */
+    padding: 0;
+    margin-bottom: 0;
+    border: none;
+    overflow: hidden;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
 }
 
 .view:not(.active-view) {
@@ -129,335 +208,195 @@ body {
 
 /* Modal Styling (Generic) */
 .modal {
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Lighter backdrop */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    /* ... keep other props ... */
     position: fixed;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent backdrop */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure modal is on top */
+    z-index: 1000;
 }
 
 .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background: var(--glass-bg-darker);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--glass-border);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    color: var(--text-color-dark);
+    /* ... keep size props ... */
     min-width: 300px;
     max-width: 600px;
-    max-height: 90vh; /* Limit height to 90% of viewport height */
-    overflow-y: auto; /* Enable vertical scrolling if content overflows */
-    display: flex; /* Allow footer to be at bottom if content is short */
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
     flex-direction: column;
 }
 
-.modal-content form {
-    flex-grow: 1; /* Allow form to take space if modal content is flex column */
+/* ... form styles ... */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
-/* Consistent styling for form elements within modals */
-.modal-content form input[type="text"],
-.modal-content form input[type="number"],
-.modal-content form select {
-    width: calc(100% - 22px); /* Full width minus padding/border, consistent with panel inputs */
-    /* Or width: 100%; if box-sizing: border-box; is globally applied and preferred */
-    padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+.form-group.half-width {
+    flex: 1;
+    min-width: 0;
+    /* Prevent overflow */
 }
 
-.modal-content form div { /* Add some margin below each form field group */
-    margin-bottom: 10px;
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
+    /* Ensure container handles full width */
 }
-.modal-content form label { /* Style labels similarly to panel */
+
+.form-group label {
     display: block;
     margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color-dark);
 }
 
-
-.modal-footer {
-    padding-top: 15px;
-    margin-top: auto; /* Push to bottom if modal-content is flex column */
-    border-top: 1px solid var(--border-color, #DDDDDD);
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px; /* Space between buttons */
+.form-group input,
+.form-group select,
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content input[type="date"],
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+    color: var(--text-color-dark);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    /* Ensure padding doesn't affect width */
 }
 
-.modal-footer .btn {
-    flex: 1 1 0%; /* Make buttons take equal width, overriding default .btn width */
+.form-group input:focus,
+.form-group select:focus,
+.modal-content input:focus,
+.modal-content select:focus {
+    outline: none;
+    border-color: var(--primary-purple);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
 }
 
-
-/* Panel Styling (Generic for slide-ins or sidebars) */
-.panel {
-    position: fixed;
-    background-color: #fff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-    z-index: 900; /* Below modals but above main content */
-    transform: translateX(-100%); /* Assume it slides from the left */
-    transition: transform 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Add visibility to transition */
-    height: 100%; /* Make panel take full height */
-    top: 0; /* Align to top */
-    left: 0; /* Align to left */
-    width: 450px; /* 50% wider than 300px (300 * 1.5 = 450) */
-    display: flex; /* Use flexbox for internal layout */
-    flex-direction: column; /* Stack header, content, footer vertically */
-    visibility: hidden; /* Hidden by default */
-}
-
-.panel.open {
-    transform: translateX(0); /* Open state: visible */
-    visibility: visible; /* Make visible */
-}
-
-/* Panel Header */
-.panel-header {
-    padding: 12px 15px; /* Reduced padding for compactness */
-    border-bottom: 1px solid var(--border-color, #DDDDDD);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.panel-header h3 {
-    margin: 0;
-    font-size: 1.1rem; /* Smaller font size */
-    font-weight: 600; /* Bolder font weight */
-}
-
-.panel-header .close-btn {
-    background: none;
-    border: none;
-    font-size: 1.5rem; /* Smaller close button */
-    cursor: pointer;
-    color: #888;
-    padding: 0; /* Remove default button padding */
-}
-.panel-header .close-btn:hover {
-    color: #555;
-}
-
-
-/* Panel Content Area */
+/* Panel Form Styles */
 .panel-content {
-    padding: 15px; /* Reduced padding for compactness */
-    flex-grow: 1; /* Allow content to take available space */
-    overflow-y: auto; /* Add scrolling if content overflows vertically */
-}
-
-/* Panel Footer */
-.panel-footer {
-    padding: 12px 15px; /* Reduced padding for compactness */
-    border-top: 1px solid var(--border-color, #DDDDDD);
+    padding: 20px;
+    height: calc(100% - 60px);
+    /* Subtract header height */
+    overflow-y: auto;
     display: flex;
-    justify-content: flex-end;
-    gap: 8px; /* Reduced gap between buttons */
-    margin-top: auto; /* Push footer to the bottom */
+    flex-direction: column;
 }
 
-.panel-footer button {
-    flex: 1 1 0%; /* Make buttons take equal width, overriding default .btn width */
-    padding: 8px 12px; /* Smaller button padding */
-    font-size: 0.9rem; /* Smaller font size for buttons */
-}
-
-/* Consistent styling for form elements within panels */
 .panel-content label {
     display: block;
-    margin-bottom: 4px; /* Reduced margin below label */
-    font-weight: bold;
-    font-size: 0.85rem; /* Smaller font size */
-    color: var(--text-color, #333333); /* Use text color variable */
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color-dark);
+    font-size: 0.9rem;
 }
 
 .panel-content input[type="text"],
 .panel-content input[type="number"],
+.panel-content input[type="date"],
 .panel-content select {
-    width: 100%; /* Full width with border-box */
-    padding: 6px 8px; /* Reduced padding */
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem; /* Smaller font size */
-    margin-bottom: 12px; /* Reduced margin for spacing */
-    box-sizing: border-box;
-}
-
-.panel-content div { /* Add some margin below each form field group */
-     margin-bottom: 10px; /* Reduced margin */
-}
-
-/* Color Palette Styling */
-.color-palette-container {
-    display: flex;
-    flex-direction: column; /* Stack groups vertically */
-    gap: 1px; /* Reduced space between color groups */
-    margin-bottom: 12px; /* Reduced space below the palette */
-}
-
-.color-palette-container h4 {
-    margin-top: 6px;
-    margin-bottom: 3px;
-    font-size: 0.8em;
-    color: var(--text-color-medium);
-}
-
-.color-swatch-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px; /* Reduced space between swatches within a group */
-    justify-content: space-between; /* Distribute swatches evenly across the width */
-}
-
-.color-swatch {
-    width: 20px; /* Smaller swatch size */
-    height: 20px; /* Smaller swatch size */
-    border-radius: 3px;
-    cursor: pointer;
-    border: 1px solid #ccc; /* Add a subtle border */
-    box-sizing: border-box; /* Include border in size */
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.color-swatch:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-.color-swatch.active-swatch {
-    border-color: var(--primary-color, #51247A); /* Highlight active swatch */
-    border-width: 2px;
-    transform: scale(1.1); /* Slightly larger when active */
-}
-
-
-/* Collapsible Sidebar (Example) */
-.collapsible-sidebar {
-    top: 0;
-    right: 0; /* Or left: 0 */
-    width: 300px; /* Example width */
-    height: 100%;
-    padding: 1rem;
-    transform: translateX(100%); /* Hidden by default if on right */
-    transition: transform 0.3s ease-in-out;
-}
-
-.collapsible-sidebar.open {
-    transform: translateX(0);
-}
-
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* Placeholder for Sprint Board specific styles */
-#sprint-board-view {
-    /* Styles for Kanban columns, task cards etc. */
     width: 100%;
-    overflow-x: auto; /* Enable horizontal scrolling for columns */
-    flex-grow: 1; /* Allow sprint board to take remaining vertical space in #app-main */
-    /* overflow-y: hidden; */ /* Removed to allow vertical scrolling within columns */
-    min-height: 0; /* Allow flex item to shrink below content size */
-}
-
-.sprint-board-filter-container {
-    display: flex;
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-    background-color: #eef3f7;
-    border: 1px solid #d9e2ea;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    max-width: 280px; /* Constrain to backlog column width */
-    width: 100%;
-}
-
-/* Input row - keep input and search button on same line */
-.filter-input-row {
-    display: flex;
-    gap: 6px;
-    width: 100%;
-    align-items: center;
-}
-
-.sprint-board-filter-input {
-    flex: 1 1 auto;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color-medium);
-    border-radius: 6px;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.5);
+    transition: all 0.2s ease;
     color: var(--text-color-dark);
-    background-color: var(--card-background);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    min-width: 0; /* Allow input to shrink */
 }
 
-.filter-apply-btn {
-    flex: 0 0 auto;
-    padding: 8px 10px;
-    border: 1px solid var(--border-color-medium);
-    border-radius: 6px;
-    background-color: var(--card-background);
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--text-color-dark);
-    transition: background-color 0.2s ease;
-    white-space: nowrap;
-    width: 32px; /* Fixed width for search icon */
-    height: 36px; /* Match input height */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.filter-apply-btn:hover {
-    background-color: var(--light-purple);
-}
-
-.sprint-board-filter-input::placeholder {
-    color: var(--text-color-light);
-}
-
-.sprint-board-filter-input:focus {
+.panel-content input:focus,
+.panel-content select:focus {
     outline: none;
     border-color: var(--primary-purple);
+    background: rgba(255, 255, 255, 0.8);
     box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
 }
 
+.panel-content input[readonly] {
+    background-color: rgba(233, 236, 239, 0.5);
+    cursor: default;
+    color: var(--text-color-medium);
+}
+
+/* Panel Footer */
+.panel-footer {
+    padding: 15px 0 0 0;
+    margin-top: auto;
+    /* Push to bottom */
+    display: flex;
+    justify-content: flex-end;
+    /* Align right */
+    gap: 10px;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 20px;
+}
+
+/* Ensure buttons don't have default margins from previous rule */
+.panel-footer button {
+    margin: 0;
+}
+
+/* Sprint Board Columns */
 .sprint-columns-container {
-    display: flex; /* Arrange columns horizontally */
+    display: flex;
+    /* Arrange columns horizontally */
     flex-direction: row;
-    align-items: flex-start; /* Align columns to the top */
-    gap: 15px; /* Space between columns */
-    padding-bottom: 1rem; /* Space for horizontal scrollbar if needed */
-    height: 100%; /* Make container take full height of its parent */
+    align-items: flex-start;
+    /* Align columns to the top */
+    gap: 15px;
+    /* Space between columns */
+    padding-bottom: 1rem;
+    /* Space for horizontal scrollbar if needed */
+    height: 100%;
+    /* Make container take full height of its parent */
 }
 
 .sprint-column {
-    flex: 0 0 300px; /* Fixed width for columns, no growing, no shrinking */
+    flex: 0 0 300px;
     max-width: 300px;
-    min-height: 200px; /* Minimum height for a column */
-    background-color: var(--column-background); /* Light grey for column */
-    border: none; /* Removed border */
-    border-radius: 8px; /* More rounded corners */
-    padding: 0; /* Removed padding from column itself */
+    min-height: 200px;
+    /* Glass Effect */
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    height: 100%; /* Make column take full height of its container */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow for columns */
+    height: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sprint-column:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
 }
 
 .sprint-column:last-child {
@@ -465,115 +404,163 @@ body {
 }
 
 .sprint-column-header {
-    padding: 12px 15px; /* Increased padding */
-    border-bottom: 1px solid var(--border-color-medium); /* Medium border */
-    display: flex; /* Use flexbox */
-    justify-content: space-between; /* Space out items */
-    align-items: flex-start; /* Align items to the top */
+    padding: 12px 15px;
+    /* Increased padding */
+    border-bottom: 1px solid var(--border-color-medium);
+    /* Medium border */
+    display: flex;
+    /* Use flexbox */
+    justify-content: space-between;
+    /* Space out items */
+    align-items: flex-start;
+    /* Align items to the top */
     position: relative;
-    border-top-left-radius: 8px; /* Apply border-radius to header */
+    border-top-left-radius: 8px;
+    /* Apply border-radius to header */
     border-top-right-radius: 8px;
 }
 
 .sprint-info-container {
-    flex-grow: 1; /* Allow info container to take up space */
-    margin-right: 10px; /* Add some space between info and button */
+    flex-grow: 1;
+    /* Allow info container to take up space */
+    margin-right: 10px;
+    /* Add some space between info and button */
 }
 
 .sprint-column-header h3.sprint-name {
-    font-size: 1.1em; /* Adjusted font size */
-    font-weight: 600; /* Bolder font weight */
-    color: var(--dark-purple); /* Darker purple for sprint titles */
+    font-size: 1.1em;
+    /* Adjusted font size */
+    font-weight: 600;
+    /* Bolder font weight */
+    color: var(--dark-purple);
+    /* Darker purple for sprint titles */
     margin-top: 0;
     margin-bottom: 0.25rem;
 }
 
 .sprint-column-header p {
-    font-size: 0.8em; /* Adjusted font size */
-    color: var(--text-color-light); /* Light grey for sub-info */
+    font-size: 0.8em;
+    /* Adjusted font size */
+    color: var(--text-color-light);
+    /* Light grey for sub-info */
     margin: 0.2rem 0;
 }
 
 /* Style for the delete sprint button */
 .delete-sprint-btn {
-    background: none; /* Remove default background */
-    border: none; /* Remove default border */
-    color: var(--text-color-light); /* Muted color */
-    font-size: 1.2rem; /* Slightly larger icon */
+    background: none;
+    /* Remove default background */
+    border: none;
+    /* Remove default border */
+    color: var(--text-color-light);
+    /* Muted color */
+    font-size: 1.2rem;
+    /* Slightly larger icon */
     cursor: pointer;
-    padding: 0; /* Remove padding */
-    margin-left: auto; /* Push to the right */
-    line-height: 1; /* Adjust line height for better vertical alignment */
+    padding: 0;
+    /* Remove padding */
+    margin-left: auto;
+    /* Push to the right */
+    line-height: 1;
+    /* Adjust line height for better vertical alignment */
     transition: color 0.2s ease;
 }
 
 .delete-sprint-btn:hover {
-    color: var(--text-color-dark); /* Darker color on hover */
+    color: var(--text-color-dark);
+    /* Darker color on hover */
 }
 
 
 /* Style for over-capacity sprint header */
 .sprint-column-header.over-capacity-header {
-    border-bottom-color: var(--danger-red); /* Use danger red for border */
+    border-bottom-color: var(--danger-red);
+    /* Use danger red for border */
 }
 
 /* Style for over-capacity story points text */
 .sprint-story-points.over-capacity {
-    color: var(--danger-red); /* Use danger red for text */
-    font-weight: bold; /* Make text bold */
+    color: var(--danger-red);
+    /* Use danger red for text */
+    font-weight: bold;
+    /* Make text bold */
 }
 
 
 .task-list {
-    flex-grow: 1; /* Allow task list to take available vertical space */
-    min-height: 100px; /* Minimum height for dropping tasks */
-    padding: 10px; /* Padding for the card area within the column */
-    overflow-y: auto; /* Enable vertical scrolling for tasks within the column */
+    flex-grow: 1;
+    /* Allow task list to take available vertical space */
+    min-height: 100px;
+    /* Minimum height for dropping tasks */
+    padding: 10px;
+    /* Padding for the card area within the column */
+    overflow-y: auto;
+    /* Enable vertical scrolling for tasks within the column */
 }
 
 .sprint-column button.add-task-sprint-btn,
 .sprint-column button.add-task-backlog-btn,
 .sprint-column button.global-add-sprint-btn {
-    margin: 10px; /* Margin around the button */
-    padding: 10px 18px; /* Adjusted padding to match .btn */
-    background-color: var(--accent-green); /* Green background */
-    border: 1px solid var(--accent-green); /* Green border */
-    border-radius: 5px; /* More rounded corners */
+    margin: 10px;
+    /* Margin around the button */
+    padding: 10px 18px;
+    /* Adjusted padding to match .btn */
+    background-color: var(--accent-green);
+    /* Green background */
+    border: 1px solid var(--accent-green);
+    /* Green border */
+    border-radius: 5px;
+    /* More rounded corners */
     cursor: pointer;
-    width: calc(100% - 20px); /* Full width within padding */
-    box-sizing: border-box; /* Ensure padding and border are included in the width */
-    font-weight: 600; /* Bolder font weight */
-    color: white; /* White text */
+    width: calc(100% - 20px);
+    /* Full width within padding */
+    box-sizing: border-box;
+    /* Ensure padding and border are included in the width */
+    font-weight: 600;
+    /* Bolder font weight */
+    color: white;
+    /* White text */
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .sprint-column button.add-task-sprint-btn:hover,
 .sprint-column button.add-task-backlog-btn:hover,
 .sprint-column button.global-add-sprint-btn:hover {
-    background-color: var(--dark-green); /* Darker green on hover */
-    border-color: var(--dark-green); /* Darker green on hover */
+    background-color: var(--dark-green);
+    /* Darker green on hover */
+    border-color: var(--dark-green);
+    /* Darker green on hover */
 }
 
 /* Specific styling for backlog buttons */
 .sprint-column.backlog-column button.add-task-backlog-btn,
 .sprint-column.backlog-column button.add-feature-template-btn {
-    white-space: normal; /* Allow text to wrap */
-    font-size: 0.9rem; /* Keep font size */
-    padding: 10px 12px; /* Increased padding for better text fit */
-    text-align: center; /* Center the text */
-    margin-top: 10px; /* Ensure consistent top margin with other buttons */
+    white-space: normal;
+    /* Allow text to wrap */
+    font-size: 0.9rem;
+    /* Keep font size */
+    padding: 10px 12px;
+    /* Increased padding for better text fit */
+    text-align: center;
+    /* Center the text */
+    margin-top: 10px;
+    /* Ensure consistent top margin with other buttons */
 }
 
 /* Ensure backlog column header stacks items vertically */
 .backlog-column .sprint-column-header {
     display: flex;
-    flex-direction: column; /* Stack items vertically */
-    align-items: flex-start; /* Align items to the start */
+    flex-direction: column;
+    /* Stack items vertically */
+    align-items: flex-start;
+    /* Align items to the start */
 }
 
 .backlog-column .sprint-column-header h3 {
-    width: 100%; /* Ensure title takes full width */
-    margin-bottom: 0.5rem; /* Add some space below the title */
+    width: 100%;
+    /* Ensure title takes full width */
+    margin-bottom: 0.5rem;
+    /* Add some space below the title */
 }
 
 /* The global-add-sprint-btn is now styled by the general rule above */
@@ -589,153 +576,263 @@ body {
 
 .backlog-column {
     /* Specific styles for backlog if needed */
-    background-color: var(--column-background); /* Use column background for backlog */
+    background-color: var(--column-background);
+    /* Use column background for backlog */
 }
 
 
 /* Placeholder for Roadmap specific styles */
 #roadmap-view {
     /* Styles for matrix grid, intersections etc. */
-    overflow-x: auto; /* Allow horizontal scrolling for many sprints */
-    padding: 0; /* Remove default view padding if grid handles it */
+    overflow-x: auto;
+    /* Allow horizontal scrolling for many sprints */
+    padding: 0;
+    /* Remove default view padding if grid handles it */
 }
 
 .roadmap-grid-container {
-    display: inline-grid; /* Use inline-grid to allow container to size to content, then scroll on #roadmap-view */
+    display: inline-grid;
+    /* Use inline-grid to allow container to size to content, then scroll on #roadmap-view */
     /* Columns: 1 (component names) + 1 (backlog) + N (sprints) */
     /* Rows: 1 (timeline header) + M (components) */
     /* Grid template will be set dynamically or based on a fixed number of columns initially */
-    align-items: start; /* Align grid items to the start of their grid area (top-align) */
+    align-items: start;
+    /* Align grid items to the start of their grid area (top-align) */
 }
 
 .roadmap-timeline-header,
 .roadmap-component-row {
-    grid-column: 1 / -1; /* Make these elements span all columns of the grid */
-    display: flex; /* Ensure they are flex containers for their internal cells */
+    grid-column: 1 / -1;
+    /* Make these elements span all columns of the grid */
+    display: flex;
+    /* Ensure they are flex containers for their internal cells */
 }
 
 .roadmap-header-cell,
 .roadmap-component-name-cell,
 .roadmap-intersection-cell {
-    padding: 8px; /* Revert to common padding for consistent height calculation */
-    border-right: 1px solid var(--border-color-medium); /* Use variable */
-    border-bottom: 1px solid var(--border-color-medium); /* Use variable */
-    min-height: 50px; /* Re-introduce min-height for all cells for consistent borders */
+    padding: 8px;
+    /* Revert to common padding for consistent height calculation */
+    border-right: 1px solid var(--border-color-medium);
+    /* Use variable */
+    border-bottom: 1px solid var(--border-color-medium);
+    /* Use variable */
+    min-height: 50px;
+    /* Re-introduce min-height for all cells for consistent borders */
     font-size: 0.9rem;
 }
 
 .roadmap-header-cell {
-    background-color: var(--column-background); /* Use column background */
+    background-color: var(--column-background);
+    /* Use column background */
     font-weight: bold;
-    text-align: center; /* Keep text aligned center for headers */
-    position: sticky; /* Sticky header for sprints */
+    text-align: center;
+    /* Keep text aligned center for headers */
+    position: sticky;
+    /* Sticky header for sprints */
     top: 0;
     z-index: 10;
-    min-width: 180px; /* Ensure header cell matches the column width */
+    min-width: 180px;
+    /* Ensure header cell matches the column width */
 }
-.roadmap-timeline-header .roadmap-header-cell:first-child { /* Corner cell */
+
+.roadmap-timeline-header .roadmap-header-cell:first-child {
+    /* Corner cell */
     position: sticky;
     left: 0;
-    z-index: 20; /* Above other sticky headers */
+    z-index: 20;
+    /* Above other sticky headers */
 }
 
 /* Specific flex properties for the corner cell */
 .roadmap-corner-cell {
     flex-grow: 0;
     flex-shrink: 0;
-    flex-basis: 180px; /* Matches the first grid column width */
+    flex-basis: 180px;
+    /* Matches the first grid column width */
 }
 
 .roadmap-sprint-header-cell {
-    min-width: 150px; /* Minimum width for sprint columns */
-    max-width: 250px; /* Max width for sprint columns */
-    flex-grow: 1;      /* Allow cell to grow to fill available space in the flex row, up to its max-width */
-    flex-shrink: 1;    /* Allow cell to shrink, down to its min-width */
-    flex-basis: 150px; /* Start with the minimum width defined in minmax() */
+    min-width: 150px;
+    /* Minimum width for sprint columns */
+    max-width: 250px;
+    /* Max width for sprint columns */
+    flex-grow: 1;
+    /* Allow cell to grow to fill available space in the flex row, up to its max-width */
+    flex-shrink: 1;
+    /* Allow cell to shrink, down to its min-width */
+    flex-basis: 150px;
+    /* Start with the minimum width defined in minmax() */
 }
+
 .roadmap-component-name-cell {
-    background-color: var(--page-background); /* Use page background */
+    background-color: var(--page-background);
+    /* Use page background */
     font-weight: bold;
-    text-align: left; /* Keep text aligned left */
-    min-width: 180px; /* Width for component name column */
-    position: sticky; /* Sticky component names */
+    text-align: left;
+    /* Keep text aligned left */
+    min-width: 180px;
+    /* Width for component name column */
+    position: sticky;
+    /* Sticky component names */
     left: 0;
-    z-index: 5; /* Below corner cell but above scrolling content */
-    padding: 8px; /* Revert to common padding for consistent height calculation */
+    z-index: 5;
+    /* Below corner cell but above scrolling content */
+    padding: 8px;
+    /* Revert to common padding for consistent height calculation */
     flex-grow: 0;
     flex-shrink: 0;
-    flex-basis: 180px; /* Matches the first grid column width */
+    flex-basis: 180px;
+    /* Matches the first grid column width */
 }
 
 .roadmap-intersection-cell {
-    min-width: 150px; /* Match sprint header cell min-width */
-    max-width: 250px; /* Match sprint header cell max-width */
-    background-color: var(--card-background); /* Use card background */
-    vertical-align: top; /* Align content to top */
-    flex-grow: 1;      /* Allow cell to grow to fill available space in the flex row, up to its max-width */
-    flex-shrink: 1;    /* Allow cell to shrink, down to its min-width */
-    flex-basis: 150px; /* Start with the minimum width defined in minmax() */
+    min-width: 150px;
+    /* Match sprint header cell min-width */
+    max-width: 250px;
+    /* Match sprint header cell max-width */
+    background-color: var(--card-background);
+    /* Use card background */
+    vertical-align: top;
+    /* Align content to top */
+    flex-grow: 1;
+    /* Allow cell to grow to fill available space in the flex row, up to its max-width */
+    flex-shrink: 1;
+    /* Allow cell to shrink, down to its min-width */
+    flex-basis: 150px;
+    /* Start with the minimum width defined in minmax() */
 }
 
 .roadmap-intersection-cell:hover {
-    background-color: var(--light-purple); /* Light purple hover for intersection cells */
+    background-color: var(--light-purple);
+    /* Light purple hover for intersection cells */
 }
 
 /* Style for roadmap cells that are part of an activity range */
-.roadmap-intersection-cell.roadmap-activity-cell {
-    /* Background color is now set dynamically via JavaScript based on task color */
-    /* You can add other styles like border, box-shadow if needed */
-}
+/* Style for roadmap cells that are part of an activity range */
+/* .roadmap-intersection-cell.roadmap-activity-cell {} - Populated by JS */
 
 .roadmap-task-list {
-    min-height: 60px; /* Min height for drag-drop area */
+    min-height: 60px;
+    /* Min height for drag-drop area */
     padding: 4px;
-    height: 100%; /* Fill cell */
+    height: 100%;
+    /* Fill cell */
 }
 
-.task-card { /* Applying styles to the general task-card class */
-    background-color: var(--card-background); /* Default, will be overridden by JS */
-    border: 1px solid var(--border-color-light); /* Add a subtle border around the card */
-    padding: 4px 6px; /* Further decreased internal padding for compactness */
-    margin-bottom: 4px; /* Further decreased margin between cards for compactness */
-    border-radius: 6px; /* Softer, modern border radius */
-    box-shadow: 0 2px 4px var(--shadow-light); /* Subtle shadow */
+.task-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     cursor: grab;
-    font-size: 0.9rem; /* Base font size for card content */
-    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    font-size: 0.9rem;
+    position: relative;
+    overflow: hidden;
+    padding-right: 26px;
+    /* Space for traffic light stripe */
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Glass feel */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
+
 .task-card:hover {
-    box-shadow: 0 4px 8px var(--shadow-medium); /* More prominent shadow on hover */
-    transform: translateY(-2px); /* Subtle lift effect */
-    border-color: var(--accent-green); /* Green border on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    border-color: var(--accent-green);
+    background: #FFFFFF;
+    z-index: 10;
 }
+
 .task-card .task-name {
-    font-size: 0.9rem; /* Decreased font for name */
-    font-weight: 600; /* Bolder name */
-    color: var(--text-color-dark); /* Dark text for title */
-    margin: 0 0 2px 0; /* Further decreased margin below name for compactness */
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-color-dark);
+    margin: 0 0 4px 0;
+    line-height: 1.4;
 }
-.task-card p { /* Style for paragraphs within task card */
-    font-size: 0.75rem; /* Decreased font for details */
-    margin: 0; /* Removed vertical margin for compactness */
-    color: var(--text-color-medium); /* Slightly muted text color for details */
-    display: flex; /* Use flex for meta info */
+
+.task-card p {
+    font-size: 0.8rem;
+    margin: 0;
+    color: var(--text-color-medium);
+    display: flex;
     align-items: center;
+    gap: 6px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Apply animations */
+.task-card {
+    animation: slideInUp 0.3s ease-out forwards;
+}
+
+.modal-content {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.view.active-view {
+    animation: fadeIn 0.4s ease-in-out;
 }
 
 /* Style for task cards with dark background colors to ensure text readability */
 .task-card.dark-background .task-name,
 .task-card.dark-background p {
-    color: white; /* Light text for dark backgrounds */
+    color: white;
+    /* Light text for dark backgrounds */
 }
+
 .task-card .task-story-points {
-    font-weight: 500; /* Make points slightly bolder */
+    font-weight: 500;
+    /* Make points slightly bolder */
 }
+
 .task-card .task-dependency {
-    font-style: italic; /* Italicize dependency */
-    color: var(--text-color-light); /* Muted color for dependency */
-    margin-top: 5px; /* Add some space above it */
-    font-size: 0.7rem; /* Decreased font for dependency */
+    font-style: italic;
+    /* Italicize dependency */
+    color: var(--text-color-light);
+    /* Muted color for dependency */
+    margin-top: 5px;
+    /* Add some space above it */
+    font-size: 0.7rem;
+    /* Decreased font for dependency */
 }
 
 /* Traffic Light Component Styles - Redesigned as right stripe */
@@ -744,26 +841,29 @@ body {
     top: 0;
     right: 0;
     bottom: 0;
-    width: 20px; /* Width of the black stripe */
-    background-color: #333;
+    width: 22px;
+    background: rgba(0, 0, 0, 0.05);
+    /* Subtle dark strip */
+    backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     z-index: 2;
     cursor: pointer;
-    border-top-right-radius: 6px; /* Match card border radius */
-    border-bottom-right-radius: 6px;
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .traffic-light {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.3); /* Light border for contrast on dark background */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Light border for contrast on dark background */
     transition: all 0.2s ease;
-    background-color: #666; /* Darker grey for "off" state on dark background */
+    background-color: #666;
+    /* Darker grey for "off" state on dark background */
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -792,90 +892,139 @@ body {
 }
 
 /* Position task card to accommodate the traffic light stripe */
+/* Position task card to accommodate the traffic light stripe */
 .task-card {
     position: relative;
     overflow: hidden;
-    padding-right: 26px; /* Add padding to prevent text from overlapping the stripe */
+    padding-right: 26px;
+    /* Add padding to prevent text from overlapping the stripe */
 }
 
 /* Traffic Light Panel Styles */
 .traffic-light-panel-container {
     display: flex;
     gap: 6px;
-    margin-bottom: 12px;
-    padding: 6px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
+    margin-bottom: 15px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Semi-transparent */
+    border-radius: 8px;
+    border: 1px solid var(--border-color-medium);
 }
 
 .traffic-light-panel-option {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    padding: 6px;
-    border-radius: 4px;
+    gap: 6px;
+    padding: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 2px solid transparent;
     flex: 1;
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .traffic-light-panel-option:hover {
-    background-color: #e9ecef;
+    background-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
 }
 
 .traffic-light-panel-option.active {
     border-color: var(--primary-purple);
-    background-color: var(--light-purple);
+    background-color: rgba(106, 13, 173, 0.1);
+    /* Light purple tint */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .traffic-light-panel-indicator {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: bold;
-    color: #666;
+    color: #555;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .traffic-light-panel-indicator.red {
-    background-color: #dc3545;
-    border-color: #c82333;
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+    border-color: #c92a2a;
 }
 
 .traffic-light-panel-indicator.amber {
-    background-color: #ffc107;
-    border-color: #e0a800;
+    background: radial-gradient(circle at 30% 30%, #fcc419, #f08c00);
+    border-color: #f08c00;
 }
 
 .traffic-light-panel-indicator.green {
-    background-color: #28a745;
-    border-color: #1e7e34;
+    background: radial-gradient(circle at 30% 30%, #51cf66, #2b8a3e);
+    border-color: #2b8a3e;
 }
 
 .traffic-light-panel-indicator.none {
-    background-color: #e0e0e0;
-    border-color: #ccc;
+    background-color: #e9ecef;
+    border-color: #ced4da;
 }
 
 .traffic-light-panel-option span {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 500;
     color: var(--text-color-medium);
 }
 
 .traffic-light-panel-option.active span {
     color: var(--primary-purple);
-    font-weight: 600;
+    font-weight: 700;
 }
 
-/* Traffic Light Filter Buttons */
+/* Color Palette Styles */
+.color-palette-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    border: 1px solid var(--border-color-medium);
+}
+
+.color-swatch-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    /* Circle swatches */
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+}
+
+.color-swatch:hover {
+    transform: scale(1.2);
+    z-index: 2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.color-swatch.active-swatch {
+    border-color: var(--text-color-dark);
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Traffic Light Filter Buttons (Dashboard) */
 .traffic-light-filter-container {
     display: flex;
     justify-content: flex-start;
@@ -946,6 +1095,11 @@ body {
     color: white;
 }
 
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
 .traffic-light-filter-none {
     color: #6c757d;
     font-size: 16px;
@@ -955,6 +1109,7 @@ body {
     background-color: #6c757d;
     border-color: #6c757d;
     color: white;
+}
 }
 
 .toggle-traffic-lights-btn {
@@ -967,7 +1122,7 @@ body {
     font-size: 12px;
     font-weight: 500;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
 }
 
 .toggle-traffic-lights-btn:hover {
@@ -979,15 +1134,20 @@ body {
 
 /* DHTMLX Gantt Chart Specific Styles */
 .gantt_task_content {
-    color: black !important; /* Ensure task text is black for readability */
+    color: black !important;
+    /* Ensure task text is black for readability */
 }
+
 .task-list .sortable-ghost {
-    background-color: #e6f7ff; /* Light blue ghost */
+    background-color: #e6f7ff;
+    /* Light blue ghost */
     border: 1px dashed #91d5ff;
     opacity: 0.7;
 }
+
 .task-list .sortable-chosen {
-    background-color: #fffbe6; /* Light yellow chosen */
+    background-color: #fffbe6;
+    /* Light yellow chosen */
 }
 
 /* Roadmap specific task item styles (if different from general task-card) */
@@ -1008,14 +1168,17 @@ body {
     border: 1px solid #ccc;
     cursor: pointer;
 }
+
 .sprint-name-edit,
 .sprint-capacity-edit {
     width: calc(100% - 10px);
     padding: 5px;
-    font-size: 1.1rem; /* Match h3 */
+    font-size: 1.1rem;
+    /* Match h3 */
     border: 1px solid #ccc;
     border-radius: 3px;
 }
+
 /* New styles for Welcome Modal visual upgrade */
 .modal-container {
     background-color: #ffffff;
@@ -1023,7 +1186,8 @@ body {
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 550px; /* Increased max width for better button fit */
+    max-width: 550px;
+    /* Increased max width for better button fit */
     box-sizing: border-box;
 }
 
@@ -1070,7 +1234,8 @@ body {
 
 .form-group input[type="date"],
 .form-group input[type="number"],
-.form-group input[type="text"], /* If you add text inputs */
+.form-group input[type="text"],
+/* If you add text inputs */
 .form-group select {
     width: 100%;
     padding: 12px 15px;
@@ -1120,47 +1285,61 @@ body {
     transform: translateY(1px);
 }
 
-.btn-secondary { /* For "Import XLSX" */
+.btn-secondary {
+    /* For "Import XLSX" */
     background-color: #6c757d;
     color: white;
-    margin-bottom: 15px; /* Space before the download link */
+    margin-bottom: 15px;
+    /* Space before the download link */
 }
 
 .btn-secondary:hover {
     background-color: #545b62;
 }
+
 .btn-secondary:active {
     transform: translateY(1px);
 }
 
 /* Styling for buttons within the welcome modal to ensure consistent sizing */
 /* Apply to buttons directly within modal-container or modal-step-content */
-.modal-container .btn:not(.modal-footer .btn) { /* Exclude footer buttons from this rule */
-    max-width: 250px; /* Set a max-width for consistency */
-    width: 100%; /* Allow them to take full width up to max-width */
-    margin-left: auto; /* Center the button */
-    margin-right: auto; /* Center the button */
+.modal-container .btn:not(.modal-footer .btn) {
+    /* Exclude footer buttons from this rule */
+    max-width: 250px;
+    /* Set a max-width for consistency */
+    width: 100%;
+    /* Allow them to take full width up to max-width */
+    margin-left: auto;
+    /* Center the button */
+    margin-right: auto;
+    /* Center the button */
 }
 
 /* Ensure option-section buttons are centered and take full width up to max-width */
 .modal-container .option-section {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center content horizontally */
-    gap: 10px; /* Space between button and text */
+    align-items: center;
+    /* Center content horizontally */
+    gap: 10px;
+    /* Space between button and text */
 }
 
 .welcome-next-button-container {
     display: flex;
     justify-content: center;
-    margin-top: 20px; /* Add some space above the button */
+    margin-top: 20px;
+    /* Add some space above the button */
 }
 
 /* Ensure modal-footer buttons retain their equal width behavior */
 .modal-footer .btn {
-    flex: 1 1 0%; /* Make buttons take equal width */
-    min-width: 100px; /* Ensure buttons don't shrink too much */
-    width: auto; /* Reset width to allow flex to control it */
+    flex: 1 1 0%;
+    /* Make buttons take equal width */
+    min-width: 100px;
+    /* Ensure buttons don't shrink too much */
+    width: auto;
+    /* Reset width to allow flex to control it */
 }
 
 /* Section Divider */
@@ -1173,12 +1352,14 @@ body {
 
 /* Download Link */
 .download-link {
-    display: block; /* Make it take full width for easier clicking */
+    display: block;
+    /* Make it take full width for easier clicking */
     text-align: center;
     font-size: 15px;
     color: #007bff;
     text-decoration: none;
-    margin-top: 10px; /* Ensure space if button is not full width and centered */
+    margin-top: 10px;
+    /* Ensure space if button is not full width and centered */
 }
 
 .download-link:hover {
@@ -1188,8 +1369,10 @@ body {
 
 /* To make the date input consistent if browser adds extra padding */
 input[type="date"]::-webkit-calendar-picker-indicator {
-    margin-left: 5px; /* Adjust as needed */
-    display: block; /* Added to prevent empty ruleset warning */
+    margin-left: 5px;
+    /* Adjust as needed */
+    display: block;
+    /* Added to prevent empty ruleset warning */
 }
 
 /* --- Settings Page Specific Styles --- */
@@ -1204,7 +1387,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .preview-page {
     border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
     margin: 10px 0;
 }
@@ -1223,7 +1406,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     padding: 5px;
     border-radius: 3px;
     font-size: 12px;
@@ -1236,17 +1419,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         transform-origin: top left;
     }
 }
+
 .settings-page-container {
     max-width: 900px;
-    margin: 0 auto; /* Center horizontally */
+    margin: 0 auto;
+    /* Center horizontally */
     padding: 20px;
     background-color: #FFF;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    display: flex; /* Enable flexbox */
-    flex-direction: column; /* Stack children vertically */
-    flex-grow: 1; /* Allow it to take available space */
-    min-height: 80vh; /* Ensure it takes up a good portion of the viewport height */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    /* Enable flexbox */
+    flex-direction: column;
+    /* Stack children vertically */
+    flex-grow: 1;
+    /* Allow it to take available space */
+    min-height: 80vh;
+    /* Ensure it takes up a good portion of the viewport height */
 }
 
 /* --- Tabs --- */
@@ -1257,10 +1446,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .tab-content-area {
-    flex-grow: 1; /* Allow tab content area to take available vertical space */
-    overflow: hidden; /* Prevent content from overflowing the container */
-    display: flex; /* Make it a flex container for its children (tab-panes) */
-    flex-direction: column; /* Stack tab panes vertically */
+    flex-grow: 1;
+    /* Allow tab content area to take available vertical space */
+    overflow: hidden;
+    /* Prevent content from overflowing the container */
+    display: flex;
+    /* Make it a flex container for its children (tab-panes) */
+    flex-direction: column;
+    /* Stack tab panes vertically */
 }
 
 .tab-link {
@@ -1271,7 +1464,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     color: #495057;
     border-bottom: 2px solid transparent;
-    margin-bottom: -2px; /* Aligns with container border */
+    margin-bottom: -2px;
+    /* Aligns with container border */
     transition: color 0.2s ease, border-bottom-color 0.2s ease;
 }
 
@@ -1287,12 +1481,15 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .tab-pane {
     display: none;
-    flex-direction: column; /* Enable flexbox for vertical layout */
-    height: 100%; /* Ensure pane takes full height of its container */
+    flex-direction: column;
+    /* Enable flexbox for vertical layout */
+    height: 100%;
+    /* Ensure pane takes full height of its container */
 }
 
 .tab-pane.active {
-    display: flex; /* Use flex when active */
+    display: flex;
+    /* Use flex when active */
 }
 
 /* --- Section Styling within Tabs --- */
@@ -1302,15 +1499,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-bottom: 20px;
     border-bottom: 1px solid #EEE;
     padding-bottom: 10px;
-    flex-shrink: 0; /* Prevent heading from shrinking */
+    flex-shrink: 0;
+    /* Prevent heading from shrinking */
 }
 
 /* --- Item Lists (Epics, Teams, Templates) --- */
 .item-list {
     list-style: none;
     padding: 0;
-    overflow-y: auto; /* Add vertical scrollbar if content overflows */
-    max-height: 600px; /* Increased max-height */
+    overflow-y: auto;
+    /* Add vertical scrollbar if content overflows */
+    max-height: 600px;
+    /* Increased max-height */
 }
 
 .tab-pane p {
@@ -1334,19 +1534,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .item-list .actions {
-    display: flex; /* Make actions container a flexbox */
-    gap: 8px; /* Space between buttons */
+    display: flex;
+    /* Make actions container a flexbox */
+    gap: 8px;
+    /* Space between buttons */
 }
 
 .item-list .actions button {
-    margin-left: 0; /* Reset margin as gap handles spacing */
+    margin-left: 0;
+    /* Reset margin as gap handles spacing */
 }
 
 .add-item-form {
     display: flex;
     margin-top: 20px;
     gap: 10px;
-    flex-shrink: 0; /* Prevent form from shrinking */
+    flex-shrink: 0;
+    /* Prevent form from shrinking */
 }
 
 .add-item-form input[type="text"] {
@@ -1363,11 +1567,23 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     outline: none;
 }
 
+/* Panel Footer Button Sizing */
+.panel-footer button {
+    margin: 0;
+    font-size: 0.9rem;
+    /* Smaller font */
+    padding: 8px 16px;
+    /* Reduced padding */
+    border-radius: 6px;
+    /* Rounded corners as requested */
+}
+
 /* --- Buttons (General) --- */
 .btn {
     padding: 10px 18px;
     font-size: 15px;
-    border-radius: 5px;
+    border-radius: 6px;
+    /* Ensure all buttons have slight rounding */
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -1406,7 +1622,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-color: #545B62;
 }
 
-.btn-edit { /* Example: Light button */
+.btn-edit {
+    /* Example: Light button */
     background-color: #E9ECEF;
     color: #343A40;
     border-color: #CED4DA;
@@ -1451,8 +1668,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     padding: 20px;
     margin-bottom: 30px;
     border-radius: 8px;
-    background-color: var(--light-purple); /* Light background for the group */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    background-color: var(--light-purple);
+    /* Light background for the group */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .import-export-group legend {

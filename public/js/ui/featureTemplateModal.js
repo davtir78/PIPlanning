@@ -93,8 +93,8 @@ const FeatureTemplateModal = (() => {
                     </select>
                 </div>
                 <div class="modal-footer" style="text-align: right; margin-top: 20px;">
-                    <button type="submit" id="generate-feature-tasks-btn" class="button-primary">Generate Tasks</button>
-                    <button type="button" id="cancel-feature-template-btn" class="button-secondary">Cancel</button>
+                    <button type="submit" id="generate-feature-tasks-btn" class="btn btn-primary">Generate Tasks</button>
+                    <button type="button" id="cancel-feature-template-btn" class="btn btn-secondary">Cancel</button>
                 </div>
             </form>
         `;

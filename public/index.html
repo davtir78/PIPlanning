@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 </head>
+
 <body>
     <!-- Scripts will be moved to the end of body for better performance and DOM access -->
     <header id="app-header">
@@ -26,10 +28,12 @@
             <h1>PI Planner</h1>
         </div>
         <nav class="header-nav">
-            <button id="sprint-board-btn" class="view-toggle-btn active" data-view="sprint-board-view">Sprint Board</button>
+            <button id="sprint-board-btn" class="view-toggle-btn active" data-view="sprint-board-view">Sprint
+                Board</button>
             <button id="gantt-view-btn" class="view-toggle-btn" data-view="gantt-view">Roadmap</button>
             <button id="reporting-btn" class="view-toggle-btn" data-view="reporting-view">Reporting</button>
             <button id="settings-btn" class="view-toggle-btn" data-view="settings-view">Settings</button>
+            <button id="help-btn" class="view-toggle-btn" style="margin-left: 20px;">Help</button>
         </nav>
         <div id="header-controls" class="header-controls">
             <!-- The Add Sprint button will be dynamically added by SprintBoardView when active -->
@@ -95,7 +99,7 @@
                 </div>
                 <div class="form-group">
                     <label for="new-sprint-capacity">Capacity (points):</label>
-                    <input type="number" id="new-sprint-capacity" value="40" min="0" required>
+                    <input type="number" id="new-sprint-capacity" required min="1">
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Add Sprint</button>
@@ -125,12 +129,17 @@
                 <!-- Options will be populated by JavaScript -->
             </select>
 
-            <label>Color:</label> <!-- Changed label -->
+            <label for="task-dependent-team-select">Dependent Team:</label>
+            <select id="task-dependent-team-select" name="task-dependent-team">
+                <option value="">None</option>
+                <!-- Options like Frontend, Backend will be populated from config -->
+            </select>
+
+            <label>Color:</label>
             <div id="task-color-palette-container" class="color-palette-container">
                 <!-- Color swatches will be populated by JavaScript -->
             </div>
             <input type="hidden" id="selected-task-color-value" name="selected-task-color-value">
-            <!-- Original input type="color" removed -->
 
             <label>Traffic Light Status:</label>
             <div id="task-traffic-light-container" class="traffic-light-panel-container">
@@ -153,17 +162,11 @@
             </div>
             <input type="hidden" id="selected-traffic-light-status" name="selected-traffic-light-status">
 
-            <label for="task-dependent-team-select">Dependent Team:</label>
-            <select id="task-dependent-team-select" name="task-dependent-team">
-                <option value="">None</option>
-                <!-- Options like Frontend, Backend will be populated from config -->
-            </select>
-
             <div class="panel-footer">
-                <button id="save-task-btn" class="button-primary">Save Task</button>
-                <button id="duplicate-task-btn" class="button-secondary">Duplicate Task</button>
-                <button id="delete-task-btn" class="button-danger">Delete Task</button>
-                <button id="cancel-task-btn" class="button-secondary">Cancel</button>
+                <button id="save-task-btn" class="btn btn-primary">Save Task</button>
+                <button id="duplicate-task-btn" class="btn btn-secondary">Duplicate Task</button>
+                <button id="delete-task-btn" class="btn btn-danger">Delete Task</button>
+                <button id="cancel-task-btn" class="btn btn-secondary">Cancel</button>
             </div>
         </div>
     </div>
@@ -180,6 +183,8 @@
     <script src="js/importExport.js"></script> <!-- New: Shared import/export logic -->
     <script src="js/data/initialSetup.js"></script>
     <script src="js/ui/welcomeModal.js"></script>
+    <script src="js/ui/featureTemplateModal.js"></script>
+    <script src="js/ui/helpModal.js"></script> <!-- New Help Module -->
     <script src="js/ui/sprintBoardView.js"></script>
     <script src="js/ui/header.js"></script>
     <script src="js/ui/taskPropertyPanel.js"></script>
@@ -192,4 +197,5 @@
     <script src="js/main.js"></script>
 
 </body>
+
 </html>

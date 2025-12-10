@@ -44,12 +44,12 @@ const Header = (() => {
                 console.error("ReportingView module not defined.");
             }
         } else if (targetViewId === 'settings-view') {
-             if (typeof SettingsView !== 'undefined') {
-                 SettingsView.show();
-             } else {
-                 if (settingsViewEl) settingsViewEl.style.display = 'block';
-                 console.error("SettingsView module not defined.");
-             }
+            if (typeof SettingsView !== 'undefined') {
+                SettingsView.show();
+            } else {
+                if (settingsViewEl) settingsViewEl.style.display = 'block';
+                console.error("SettingsView module not defined.");
+            }
         }
         else {
             const targetViewEl = document.getElementById(targetViewId);
@@ -102,6 +102,17 @@ const Header = (() => {
         }
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => _switchView('settings-view'));
+        }
+
+        let helpBtn = document.getElementById('help-btn');
+        if (helpBtn) {
+            helpBtn.addEventListener('click', () => {
+                if (typeof HelpModal !== 'undefined') {
+                    HelpModal.openModal();
+                } else {
+                    console.error("HelpModal not loaded.");
+                }
+            });
         }
         // The addSprintBtn listener is now handled by _addSprintButton()
         console.log("Header controls initialized.");
