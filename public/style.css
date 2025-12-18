@@ -374,6 +374,10 @@ body {
     /* Space for horizontal scrollbar if needed */
     height: 100%;
     /* Make container take full height of its parent */
+    overflow-x: auto;
+    /* Allow horizontal scrolling */
+    width: 100%;
+    /* Constrain width to parent to trigger scroll */
 }
 
 .sprint-column {

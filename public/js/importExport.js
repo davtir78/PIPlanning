@@ -210,7 +210,14 @@
                                 if (!importedEpics.some(e => e.id === epic.id)) importedEpics.push(epic);
                             });
                             derivedSprints.forEach(sprint => {
-                                if (!importedSprints.some(s => s.id === sprint.id)) importedSprints.push(sprint);
+                                // Check if sprint already exists in importedSprints by ID or Name
+                                // specifically to prevent duplicates when 'Sprints' sheet has real IDs
+                                // but 'jira tasks' derives sprints with name as ID
+                                const alreadyExists = importedSprints.some(s =>
+                                    String(s.id) === String(sprint.id) ||
+                                    (s.name && sprint.name && String(s.name).trim().toLowerCase() === String(sprint.name).trim().toLowerCase())
+                                );
+                                if (!alreadyExists) importedSprints.push(sprint);
                             });
                             break;
                         case 'jira epics':
@@ -271,7 +278,6 @@
                 // --- FINAL SAVE: Save remaining data ---
                 Storage.saveEpics(importedEpics);
                 Storage.saveTasks(importedTasks);
-                Storage.saveDependentTeams(importedDependentTeams);
                 Storage.saveDependentTeams(importedDependentTeams);
 
                 // Normalization for Feature Templates (Legacy vs New)
