@@ -264,12 +264,13 @@ const GanttView = (() => {
             }
             gantt.config.min_column_width = 50;
             gantt.config.grid_resize = true; // Enable resizing the grid area
+            gantt.config.keep_grid_width = false;
 
             gantt.config.columns = [
                 {name:"text", label:"Task name", tree:true, width:250, resize:true },
-                {name:"start_date", label:"Start Time", align: "center", resize:true },
-                {name:"duration", label:"Duration", align: "center", resize:true },
-                {name:"dependentTeam", label:"Dependent Team", align: "center", resize:true }
+                {name:"start_date", label:"Start Time", align: "center", width: 100, resize:true },
+                {name:"duration", label:"Duration", align: "center", width: 80, resize:true },
+                {name:"dependentTeam", label:"Dependent Team", align: "center", width: 120, resize:true }
             ];
             gantt.config.readonly = true;
             gantt.config.fit_tasks = true; // Ensure tasks fit when changing view
