@@ -196,6 +196,16 @@
                 let importedFeatureTemplates = [];
 
                 // --- FIRST PASS: Collect all data, especially sprints ---
+                
+                // Process the Sprints sheet first if it exists, to avoid duplicates
+                // and give priority to real IDs over derived name-based IDs.
+                let sprintSheetName = workbook.SheetNames.find(n => n.trim().toLowerCase() === 'sprints');
+                if (sprintSheetName) {
+                    const worksheet = workbook.Sheets[sprintSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+                    importedSprints = importedSprints.concat(json);
+                }
+
                 workbook.SheetNames.forEach(sheetName => {
                     const worksheet = workbook.Sheets[sheetName];
                     const json = XLSX.utils.sheet_to_json(worksheet);
@@ -217,7 +227,10 @@
                                     String(s.id) === String(sprint.id) ||
                                     (s.name && sprint.name && String(s.name).trim().toLowerCase() === String(sprint.name).trim().toLowerCase())
                                 );
-                                if (!alreadyExists) importedSprints.push(sprint);
+                                if (!alreadyExists) {
+                                    sprint.id = generateUniqueId(); // Assign a proper GUID instead of name
+                                    importedSprints.push(sprint);
+                                }
                             });
                             break;
                         case 'jira epics':
@@ -231,7 +244,7 @@
                             })));
                             break;
                         case 'sprints':
-                            importedSprints = importedSprints.concat(json);
+                            // Sprints were already processed before the loop
                             break;
                         case 'dependent teams':
                             importedDependentTeams = importedDependentTeams.concat(json.map(row => row['Team Name']));
